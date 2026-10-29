@@ -1,26 +1,40 @@
 # MCXI Play — Handoff State
 
 ## Current Phase
-**Phase 10 — Publicación en Cloudflare (technical work complete; 3 owner items pending).**
+**Phase 10 — Publicación en Cloudflare (technical work complete)** + **permanent security requirement "Demo vs Paid Product" implemented locally (D020), NOT yet deployed.**
 Production: https://mcxi-play.mcxi-tech.workers.dev
 
 ## Last Completed Task
-Created D1 `mcxi-play-db` (WNAM), applied migrations 0001–0002 remotely, deployed Worker `mcxi-play`, set `SESSION_SECRET`, verified the full flow in production (API + headless Chrome mobile), deleted the test data, wrote `docs/DEPLOY.md`.
+D020: public bundle ships only the preview edition (watermark, teaser dedication); the full engine is served only through Worker endpoints that require an `activated` order; `/export-kit/*` returns 404; ZIP has no separate `config.js`. 25/25 regression tests, browser checks for demo, recipient page, buyer ZIP, admin ZIP and offline ZIP.
+
+## ⚠️ Pending deploy (security)
+Production still runs the previous version: `/export-kit/game.js` is public (200) there. Deploy:
+```
+npm run build
+npx wrangler deploy
+```
+Then check: `/export-kit/game.js` → 404, demo shows watermark, a gift link still plays.
+(The agent's deploy command was blocked by its permission settings; the owner must run it or allow it.)
 
 ## Important Changes
-- `wrangler.toml`: real `database_id`.
-- `scripts/set-admin-password.mjs` + `npm run admin:password`: hidden prompt, uploads only the SHA-256 hash as `ADMIN_PASSWORD_HASH`.
-- `docs/DEPLOY.md`: deploy, secrets, rollback, D1 export, Time Travel restore, admin lockout.
-- `README.md`: link to DEPLOY and production URL.
+- `src/game/edition.ts` (`__MCXI_FULL__`), `MainScene.ts`, `VictoryScene.ts`: watermark/teaser in preview edition.
+- `vite.config.ts` (`false`), `vite.export.config.ts` (`true`).
+- `worker/src/lib/engine.ts`: serves full engine + one whitelisted config via `ASSETS`.
+- `worker/src/routes/public.ts`: `/api/gifts/:slug/engine.js`, `/api/gifts/manage/:token/engine.js`. `admin.ts`: `/api/admin/orders/:id/engine.js`.
+- `worker/src/lib/repo.ts`: slug/token lookups join `orders.status = 'activated'`.
+- `wrangler.toml`: `binding = "ASSETS"`, `run_worker_first = ["/api/*", "/export-kit/*"]`.
+- `src/pages/GiftPage.tsx`: loads the engine via script tag. `src/lib/exportGift.ts`: `engineUrl.buyer/admin`.
+- Requirement text: `docs/PROJECT.md` → "Permanent Requirement: Demo vs Paid Product"; rule in `CLAUDE.md` and `AGENTS.md`; checklist in `docs/TASKS.md`.
+
+## Local note
+Since the real `database_id` is in `wrangler.toml`, local D1 is a new database: run `npx wrangler d1 migrations apply mcxi-play-db --local` once on each machine.
 
 ## Pending (owner)
-1. **Set the real admin password:** `npm run admin:password` (production currently has a temporary random password used for testing; nobody else knows it).
-2. Test on a real phone at the production URL.
-3. Antigravity visual review (mobile).
-4. Real payment data in `PAYMENT_INFO` (`src/lib/constants.ts`) before announcing the site; redeploy afterwards (`npm run build && npx wrangler deploy`).
-
-## Pending Errors
-None known. Note: a new workers.dev subdomain took ~1 minute to propagate (404 / error 1042 meanwhile).
+1. Deploy (above).
+2. `npm run admin:password` (production still has the temporary test password).
+3. Real phone test; Antigravity visual review.
+4. Real payment data in `PAYMENT_INFO`.
+5. Ask Codex to review D020.
 
 ## Next Task
-Owner completes the 4 items above and reviews Phase 10. Phase 11 (commercial launch) belongs to Kimi/Gemini; Claude only for technical changes.
+Owner deploys and reviews. Then Codex audit of D020.

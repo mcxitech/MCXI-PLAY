@@ -222,7 +222,7 @@
 - [x] Configurar Wrangler.
 - [x] Crear entorno de producción. (Worker `mcxi-play`, https://mcxi-play.mcxi-tech.workers.dev)
 - [x] Configurar bindings D1. (`mcxi-play-db`, id en `wrangler.toml`)
-- [ ] Configurar secretos de producción. (`SESSION_SECRET` listo. `ADMIN_PASSWORD_HASH` tiene una contraseña temporal de pruebas: falta que el dueño ejecute `npm run admin:password`.)
+- [x] Configurar secretos de producción. (`SESSION_SECRET` por Claude; `ADMIN_PASSWORD_HASH` definido por el dueño con `npm run admin:password`)
 - [x] Ejecutar migraciones. (0001 y 0002 remotas)
 - [x] Compilar frontend y backend.
 - [x] Desplegar en Cloudflare.
@@ -255,7 +255,7 @@
 - [x] Enlace público y token del comprador generados solo al activar.
 - [x] `pending`, `paid` y `cancelled` sin funciones premium.
 - [x] Pruebas 1–6 del requisito en `tests/api.test.mjs` (25/25).
-- [ ] Desplegar a producción y verificar.
+- [x] Desplegar a producción y verificar. (Dueño desplegó; Claude verificó: `/export-kit/game.js` 404, bundle público solo vista previa, endpoints de motor 404 para regalos inexistentes)
 - [ ] Revisión de Codex del requisito.
 
 ---

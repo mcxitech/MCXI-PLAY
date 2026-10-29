@@ -49,5 +49,8 @@ Since the real `database_id` is in `wrangler.toml`, local D1 is a new database: 
 - Kimi's site integrated with self-hosted fonts and corrected FAQ claims; `useTemplates.ts` kept (price always from D1).
 - Marketing screenshots 01–07 recaptured with the new site.
 
+## Production status (2026-10-29, verified)
+Deployed by the owner: D020 security, D021 game visuals, D022 storefront, price from D1 (now $49), self-hosted fonts. Owner set the real admin password. Checks: `/export-kit/game.js` 404, public bundle has watermark and no gift-config reader, fake engine/buyer links 404, admin 401 without session, 403 without Origin, SPA routes 200, demo shows watermark with generic data.
+
 ## Next Task
-Owner deploys (includes D020 + price fix + D021 visuals + D022 storefront) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.
+Owner: real purchase test from a phone (incl. playing to the letter and downloading the ZIP), payment data in `PAYMENT_INFO`, Antigravity visual review. Then Codex audit of D020; Kimi/Gemini continue Phase 11 from docs/LAUNCH_BRIEF.md and docs/MARKETING.md.

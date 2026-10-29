@@ -67,3 +67,14 @@
 **Decision:** Keep frontend (`src/`) and worker (`worker/`) in the same repo with separate tsconfigs.
 **Alternatives:** Separate repos, npm workspaces.
 **Reason:** Simplicity for a solo-developer MVP. No build orchestration overhead.
+
+## D013 — Admin session signed with HMAC (replaces unsigned cookie)
+**Date:** 2026-10-29
+**Decision:** Session cookie = `base64url(payload).base64url(HMAC-SHA256(payload, SESSION_SECRET))`. Admin API fails closed (503) if `ADMIN_PASSWORD_HASH` or `SESSION_SECRET` (≥32 chars) is missing.
+**Alternatives:** Server-side session table in D1 (allows per-session revocation, extra query per request); KV (not needed for one admin).
+**Reason:** Fixes SEC-001 with no new infrastructure. Rotating `SESSION_SECRET` invalidates all sessions.
+
+## D014 — Secrets generated with CSPRNG; order number is not a credential
+**Date:** 2026-10-29
+**Decision:** All random identifiers use `crypto.getRandomValues` with rejection sampling. The public order lookup never returns `giftSlug` or `buyerToken`; the admin delivers links privately.
+**Reason:** Fixes SEC-002 and SEC-003.

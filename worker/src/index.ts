@@ -6,6 +6,7 @@ import { handleAdminRoutes } from './routes/admin'
 export interface Env {
   DB: D1Database
   ADMIN_PASSWORD_HASH?: string
+  SESSION_SECRET?: string
 }
 
 export default {
@@ -32,7 +33,7 @@ export default {
       const publicResponse = await handlePublicRoutes(request, url, repo)
       if (publicResponse) return publicResponse
 
-      const adminResponse = await handleAdminRoutes(request, url, repo, env.ADMIN_PASSWORD_HASH)
+      const adminResponse = await handleAdminRoutes(request, url, repo, env.ADMIN_PASSWORD_HASH, env.SESSION_SECRET)
       if (adminResponse) return adminResponse
 
       return jsonError('Ruta no encontrada', 404)

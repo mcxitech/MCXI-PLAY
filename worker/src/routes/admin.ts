@@ -8,15 +8,20 @@ export async function handleAdminRoutes(
   url: URL,
   repo: Repo,
   adminPasswordHash: string | undefined,
+  sessionSecret: string | undefined,
 ): Promise<Response | null> {
   const { pathname } = url
   const method = request.method
 
   if (!pathname.startsWith('/api/admin/')) return null
 
+  // Fail closed: without both secrets no admin operation is possible
+  if (!adminPasswordHash || !sessionSecret || sessionSecret.length < 32) {
+    return jsonError('Admin no configurado', 503)
+  }
+
   // Login — no auth required
   if (method === 'POST' && pathname === '/api/admin/login') {
-    if (!adminPasswordHash) return jsonError('Admin no configurado', 503)
     const body = (await readJson(request)) as Record<string, unknown> | null
     const password = typeof body?.['password'] === 'string' ? body['password'] : ''
     if (!password) return jsonError('Contraseña requerida', 400)
@@ -29,13 +34,13 @@ export async function handleAdminRoutes(
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': createSessionCookie(secure),
+        'Set-Cookie': await createSessionCookie(secure, sessionSecret),
       },
     })
   }
 
   // All other admin routes require auth
-  if (!isAuthenticated(request)) {
+  if (!(await isAuthenticated(request, sessionSecret))) {
     return jsonError('No autorizado', 401)
   }
 
@@ -124,7 +129,10 @@ export async function handleAdminRoutes(
   if (method === 'PATCH' && cancelMatch) {
     const order = await repo.getOrderById(cancelMatch[1]!)
     if (!order) return jsonError('Pedido no encontrado', 404)
-    if (order.status === 'cancelled') return jsonError('El pedido ya está cancelado', 400)
+    // Only pending/paid orders can be cancelled; activated gifts would stay reachable otherwise
+    if (order.status !== 'pending' && order.status !== 'paid') {
+      return jsonError('Solo se pueden cancelar pedidos pendientes o pagados', 400)
+    }
 
     await repo.updateOrderStatus(order.id, 'cancelled')
     await repo.auditLog('order.cancelled', 'order', order.id, 'admin')

@@ -61,5 +61,23 @@
 | GET /api/admin/audit | `curl .../admin/audit` | 200 — action log | 2026-10-29 |
 | POST /api/admin/logout | `curl -X POST .../logout` | 200 — cookie cleared | 2026-10-29 |
 
+## Security fixes (SEC-001..004)
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Install | `npm ci` (with `.npmrc` legacy-peer-deps) | Pass — 0 vulnerabilities | 2026-10-29 |
+| Full build | `npm run build` | Pass | 2026-10-29 |
+| Worker typecheck | `npx tsc -p worker/tsconfig.json --noEmit` | Pass | 2026-10-29 |
+| Lint | `npm run lint` | **FAIL** — typescript-eslint 8.72 does not support TypeScript 7 | 2026-10-29 |
+| Forged unsigned cookie (SEC-001) | `curl -H 'Cookie: mcxi_admin_session=<base64 {exp}>' .../admin/stats` | 401 | 2026-10-29 |
+| Cookie with fake signature | `curl -H 'Cookie: mcxi_admin_session=<payload>.AAAA' .../admin/stats` | 401 | 2026-10-29 |
+| Valid login + stats | login, then `.../admin/stats` | 200 | 2026-10-29 |
+| Public order lookup after activation (SEC-002) | `curl .../api/orders/MCXI-...` | 200 — no giftSlug/buyerToken | 2026-10-29 |
+| Cancel activated order (SEC-004) | `curl -X PATCH .../cancel` | 400 — rejected | 2026-10-29 |
+| Cancel pending order | `curl -X PATCH .../cancel` | 200 — cancelled | 2026-10-29 |
+| Gift link and buyer manage link | `/api/gifts/:slug`, `/api/gifts/manage/:token` | 200 | 2026-10-29 |
+| Logout, then stats | `.../admin/stats` | 401 | 2026-10-29 |
+
 ## Manual Tests Pending
-- None for Phase 6 (all verified via curl).
+- Admin login through the browser UI after the session-cookie change.
+- Lint is broken until TypeScript and typescript-eslint versions are aligned.

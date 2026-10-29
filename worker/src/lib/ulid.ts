@@ -9,12 +9,7 @@ export function ulid(): string {
     t = Math.floor(t / 32)
   }
 
-  let random = ''
-  for (let i = 0; i < 16; i++) {
-    random += ENCODING[Math.floor(Math.random() * 32)]!
-  }
-
-  return time + random
+  return time + randomFrom(ENCODING, 16)
 }
 
 export function generateOrderNumber(): string {
@@ -33,10 +28,19 @@ export function generateBuyerToken(): string {
 }
 
 function randomAlphanumeric(length: number): string {
-  const chars = 'ABCDEFGHJKMNPQRSTVWXYZabcdefghjkmnpqrstvwxyz23456789'
+  return randomFrom('ABCDEFGHJKMNPQRSTVWXYZabcdefghjkmnpqrstvwxyz23456789', length)
+}
+
+// CSPRNG with rejection sampling to avoid modulo bias
+function randomFrom(chars: string, length: number): string {
+  const limit = 256 - (256 % chars.length)
   let result = ''
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)]!
+  while (result.length < length) {
+    const bytes = crypto.getRandomValues(new Uint8Array(length * 2))
+    for (const b of bytes) {
+      if (b < limit) result += chars[b % chars.length]!
+      if (result.length === length) break
+    }
   }
   return result
 }

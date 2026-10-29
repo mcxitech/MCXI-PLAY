@@ -22,6 +22,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** un atacante puede enviar `Cookie: mcxi_admin_session=<base64 de {"exp":<fecha futura>}>` y acceder a todas las APIs administrativas: pedidos, compradores, confirmación de pagos, activación/cancelación, plantillas, estadísticas y auditoría. Esto permite modificar datos y activar regalos sin credenciales.
 - **Corrección mínima sugerida:** usar un identificador de sesión aleatorio generado con `crypto.getRandomValues`, almacenarlo server-side (D1/KV/DO) con expiración y revocación, o firmar un payload con HMAC usando un secreto separado. Validar firma, expiración, versión y formato antes de autorizar. Mantener `HttpOnly`, `Secure` en producción y `SameSite=Strict`.
 - **Estado:** **confirmada por lectura de código**. El test documentado de “sin cookie” no cubre una cookie falsificada.
+- **Corrección (2026-10-29, Claude Code):** sesión firmada con HMAC-SHA256 usando el secreto `SESSION_SECRET`; verificación con `crypto.subtle.verify`; el admin falla cerrado (503) si falta el secreto. Verificado con cookie falsificada → 401.
 
 ### ALTA — SEC-002 — Filtración pública del token de gestión del comprador confirmada
 
@@ -30,6 +31,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** cualquiera que conozca, intercepte, reciba reenviado o adivine un número de pedido puede obtener acceso de comprador al regalo y a su configuración, y potencialmente a la exportación cuando se implemente. Esto rompe la separación entre consulta pública y administración del comprador; además puede exponer dedicatoria y nombres personalizados.
 - **Corrección mínima sugerida:** no devolver nunca `buyerToken` desde la consulta pública de pedido. Entregar el enlace/token únicamente por un canal autenticado o de una sola vez, y separar la respuesta pública de la credencial privada. Invalidar tokens expuestos durante desarrollo/pruebas.
 - **Estado:** **confirmada por lectura de código**.
+- **Corrección (2026-10-29, Claude Code):** `GET /api/orders/:orderNumber` ya no devuelve `giftSlug` ni `buyerToken`. Verificado.
 
 ### ALTA — SEC-003 — Generación de tokens y slugs con PRNG no criptográfico confirmada; riesgo de predicción
 
@@ -38,6 +40,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** un atacante que pueda inferir el estado del PRNG, observar suficientes valores o aprovechar una implementación predecible puede adivinar tokens privados o slugs públicos. El token de comprador concede acceso de gestión; el slug concede acceso de juego. La ausencia de rate limiting agrava la superficie.
 - **Corrección mínima sugerida:** generar bytes con `crypto.getRandomValues`, codificarlos en base64url/hex y verificar colisiones mediante la restricción `UNIQUE` con reintento. Para números de pedido, conservar el identificador amigable pero no usarlo como secreto.
 - **Estado:** **vulnerabilidad de diseño confirmada; explotación práctica dependiente del entorno es riesgo potencial**.
+- **Corrección (2026-10-29, Claude Code):** tokens, slugs, número de pedido e IDs usan `crypto.getRandomValues` con muestreo por rechazo. Rate limiting sigue pendiente (SEC-006).
 
 ### ALTA — SEC-004 — Cancelación deja accesible un regalo activado confirmada
 
@@ -46,6 +49,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** un pedido activado y posteriormente cancelado mantiene el enlace público funcionando y conserva el contenido personalizado. La cancelación no revoca el acceso como indican el modelo y el flujo operativo.
 - **Corrección mínima sugerida:** restringir transiciones de estado (`pending -> cancelled` y, si el negocio lo permite, `paid -> cancelled`) y rechazar `activated`; si cancelar activados es intencional, ejecutar una operación atómica que ponga `gifts.active = 0` y registrar la revocación.
 - **Estado:** **confirmada por lectura de código**.
+- **Corrección (2026-10-29, Claude Code):** cancelar solo se permite en `pending` o `paid`; un pedido activado devuelve 400. Verificado.
 
 ### MEDIA — SEC-005 — Actualizaciones de estado no son condicionales ni transaccionales; carreras confirmadas como riesgo operativo
 

@@ -85,14 +85,8 @@ export async function handlePublicRoutes(
       createdAt: order.created_at,
     }
 
-    if (order.status === 'activated') {
-      const gift = await repo.getGiftByOrderId(order.id)
-      if (gift) {
-        response['giftSlug'] = gift.public_slug
-        response['buyerToken'] = gift.buyer_token
-      }
-    }
-
+    // The order number is not a secret: never return giftSlug or buyerToken here.
+    // Links are delivered to the buyer by the admin through a private channel.
     return json(response)
   }
 

@@ -147,7 +147,7 @@
 - [x] Crear registro de cambios importantes.
 - [x] Implementar cierre de sesión.
 - [x] Probar accesos no autorizados.
-- [ ] Preparar auditoría de Codex.
+- [x] Preparar auditoría de Codex. (Auditoría en `docs/SECURITY_REVIEW.md`; SEC-001..004 corregidos)
 
 ---
 

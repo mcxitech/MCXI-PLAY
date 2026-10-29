@@ -1,0 +1,295 @@
+# MCXI Play — Master Checklist
+
+## FASE 0 — Preparación del Proyecto
+**Responsable: Claude Code**
+
+- [x] Revisar el directorio actual.
+- [x] Crear proyecto React + Vite + TypeScript.
+- [x] Configurar Tailwind CSS.
+- [x] Configurar Phaser 3.
+- [x] Preparar estructura del backend de Cloudflare.
+- [x] Configurar TypeScript estricto.
+- [x] Configurar ESLint.
+- [x] Crear `.gitignore`.
+- [x] Crear `.env.example` sin credenciales reales.
+- [x] Crear estructura de documentación.
+- [x] Crear `CLAUDE.md` y `AGENTS.md`.
+- [x] Crear checklist persistente.
+- [x] Configurar scripts de desarrollo y compilación.
+- [x] Ejecutar compilación inicial.
+- [x] Inicializar Git si todavía no existe.
+- [x] Crear commit inicial.
+
+---
+
+## FASE 1 — Producto y Arquitectura
+**Responsable: Claude Code | Apoyo opcional: Kimi gratuito**
+
+- [x] Definir alcance comercial del MVP.
+- [x] Definir el flujo del visitante.
+- [x] Definir el flujo del comprador.
+- [x] Definir el flujo del destinatario.
+- [x] Definir el flujo del administrador.
+- [x] Diseñar el modelo de plantillas reutilizables.
+- [x] Diseñar la estructura de pedidos.
+- [x] Diseñar la estructura de juegos personalizados.
+- [x] Diseñar los permisos y accesos.
+- [x] Diseñar la estrategia de exportación ZIP.
+- [x] Definir rutas públicas y privadas.
+- [x] Crear diagrama sencillo de arquitectura.
+- [x] Registrar decisiones técnicas.
+
+---
+
+## FASE 2 — Web Principal y Catálogo
+**Responsable: Claude Code**
+
+- [x] Crear layout principal.
+- [x] Diseñar encabezado MCXI Play.
+- [x] Crear identidad visual inicial.
+- [x] Crear hero comercial.
+- [x] Crear sección "Cómo funciona".
+- [x] Crear catálogo de juegos.
+- [x] Crear tarjetas reutilizables.
+- [x] Crear página individual de videojuego.
+- [x] Mostrar precio en MXN.
+- [x] Crear botones de demostración.
+- [x] Crear navegación adaptable a móviles.
+- [x] Crear footer.
+- [x] Agregar páginas base de privacidad y condiciones.
+- [x] Crear recursos provisionales originales.
+- [x] Verificar diseño móvil.
+- [x] Ejecutar build.
+
+---
+
+## FASE 3 — Primer Videojuego: "Atrapa mi corazón"
+**Responsable: Claude Code**
+
+- [x] Crear escena de carga.
+- [x] Crear escena principal.
+- [x] Crear personaje original mediante Phaser Graphics o SVG.
+- [x] Implementar movimiento.
+- [x] Implementar controles de teclado.
+- [x] Implementar controles táctiles.
+- [x] Implementar corazones coleccionables.
+- [x] Implementar dos obstáculos sencillos.
+- [x] Implementar colisiones.
+- [x] Implementar contador.
+- [x] Implementar condiciones de victoria.
+- [x] Crear pantalla final.
+- [x] Crear botón para volver a jugar.
+- [x] Agregar pausa.
+- [x] Agregar sonido opcional.
+- [x] Verificar rendimiento.
+- [x] Verificar escalado.
+- [x] Corregir errores críticos.
+
+---
+
+## FASE 4 — Personalizador y Vista Previa
+**Responsable: Claude Code**
+
+- [x] Crear formulario de personalización.
+- [x] Agregar nombre del destinatario.
+- [x] Agregar nombre del remitente.
+- [x] Agregar dedicatoria.
+- [x] Agregar elección de temática.
+- [x] Agregar selección de colores.
+- [x] Crear configuración tipada del juego.
+- [x] Aplicar cambios al motor sin duplicarlo.
+- [x] Crear vista previa.
+- [x] Validar límites de caracteres.
+- [x] Evitar HTML o scripts de usuarios.
+- [x] Distinguir demostración de juego comprado.
+- [x] Preparar resumen antes de solicitar compra.
+- [x] Probar personalizaciones distintas.
+
+---
+
+## FASE 5 — Base de Datos y API
+**Responsable: Claude Code**
+
+- [x] Configurar Cloudflare D1.
+- [x] Crear migraciones SQL.
+- [x] Crear tabla de plantillas.
+- [x] Crear tabla de versiones de plantilla.
+- [x] Crear tabla de compradores.
+- [x] Crear tabla de pedidos.
+- [x] Crear tabla de regalos personalizados.
+- [x] Crear registros de accesos cuando sean necesarios.
+- [x] Crear registros mínimos de auditoría.
+- [x] Crear repositorios de acceso a datos.
+- [x] Crear servicios de negocio.
+- [x] Crear endpoints públicos necesarios.
+- [x] Validar entradas en el servidor.
+- [x] Implementar restricciones e índices.
+- [x] Probar persistencia de pedidos.
+- [x] Probar que no se exponen datos de otros clientes.
+
+---
+
+## FASE 6 — Dashboard Administrativo
+**Responsable: Claude Code | Revisión: Codex**
+
+- [x] Implementar autenticación administrativa segura.
+- [x] Proteger APIs administrativas del lado del servidor.
+- [x] Crear dashboard principal.
+- [x] Mostrar pedidos.
+- [x] Mostrar compradores.
+- [x] Mostrar juegos vendidos.
+- [x] Mostrar estados de pago.
+- [x] Crear filtros y búsqueda.
+- [x] Crear editor de precios.
+- [x] Crear editor de configuración de plantillas.
+- [x] Crear activación y desactivación de plantillas.
+- [x] Crear estadísticas derivadas de datos reales.
+- [x] Crear registro de cambios importantes.
+- [x] Implementar cierre de sesión.
+- [x] Probar accesos no autorizados.
+- [ ] Preparar auditoría de Codex.
+
+---
+
+## FASE 7 — Pedidos, Activación y Enlaces
+**Responsable: Claude Code**
+
+- [ ] Crear formulario para solicitar compra.
+- [ ] Generar número de pedido.
+- [ ] Registrar pedido pendiente.
+- [ ] Mostrar instrucciones de pago.
+- [ ] Permitir confirmar manualmente el pago desde el dashboard.
+- [ ] Registrar fecha y estado de pago.
+- [ ] Activar regalo solamente desde una operación autorizada.
+- [ ] Generar identificador público aleatorio.
+- [ ] Crear enlace exclusivo del destinatario.
+- [ ] Crear token privado de gestión del comprador.
+- [ ] Separar los permisos de ambos enlaces.
+- [ ] Implementar revocación de acceso privado.
+- [ ] Crear página del destinatario.
+- [ ] Crear página de gestión del comprador.
+- [ ] Impedir el acceso a regalos pendientes.
+- [ ] Probar múltiples compras independientes.
+
+---
+
+## FASE 8 — Exportación Individual
+**Responsable: Claude Code**
+
+- [ ] Separar motor de juego y configuración.
+- [ ] Preparar compilación independiente del videojuego.
+- [ ] Incluir datos específicos de un comprador.
+- [ ] Incluir imágenes, audio y estilos necesarios.
+- [ ] Crear exportador ZIP.
+- [ ] Incorporar exportación al dashboard.
+- [ ] Permitir descarga autorizada al comprador.
+- [ ] Crear README para el destinatario.
+- [ ] Crear documento de licencia de uso personal.
+- [ ] Evitar incluir código fuente administrativo.
+- [ ] Evitar incluir información de otros compradores.
+- [ ] Probar funcionamiento sin D1.
+- [ ] Probar funcionamiento sin APIs de MCXI.
+- [ ] Comprobar funcionamiento con conexión y sin conexión cuando sea técnicamente viable.
+- [ ] Documentar cómo alojar el juego fuera de MCXI.
+
+---
+
+## FASE 9 — Seguridad y Calidad
+**Responsable auditor: Codex | Correcciones: Claude Code**
+
+- [ ] Revisar autenticación administrativa.
+- [ ] Revisar autorización en endpoints.
+- [ ] Revisar tokens de compradores.
+- [ ] Revisar enlaces de destinatarios.
+- [ ] Revisar validación de pedidos.
+- [ ] Revisar posibilidad de activar pagos sin permiso.
+- [ ] Revisar XSS.
+- [ ] Revisar inyección SQL.
+- [ ] Revisar seguridad de cookies y sesiones.
+- [ ] Revisar filtración de datos.
+- [ ] Revisar secretos y variables de entorno.
+- [ ] Revisar exportaciones ZIP.
+- [ ] Revisar fallos de concurrencia en activación.
+- [ ] Crear pruebas de regresión.
+- [ ] Corregir problemas críticos y altos.
+- [ ] Ejecutar build final.
+
+---
+
+## FASE 10 — Publicación en Cloudflare
+**Responsable: Claude Code | Pruebas visuales: Antigravity**
+
+- [ ] Configurar Wrangler.
+- [ ] Crear entorno de producción.
+- [ ] Configurar bindings D1.
+- [ ] Configurar secretos de producción.
+- [ ] Ejecutar migraciones.
+- [ ] Compilar frontend y backend.
+- [ ] Desplegar en Cloudflare.
+- [ ] Verificar URL gratuita real.
+- [ ] Confirmar funcionamiento del catálogo.
+- [ ] Confirmar funcionamiento del juego.
+- [ ] Confirmar personalización.
+- [ ] Confirmar creación de pedido.
+- [ ] Confirmar acceso administrativo.
+- [ ] Confirmar activación de pago manual.
+- [ ] Confirmar acceso del comprador.
+- [ ] Confirmar acceso del destinatario.
+- [ ] Confirmar exportación ZIP.
+- [ ] Comprobar privacidad de datos.
+- [ ] Probar en celular.
+- [ ] Solicitar revisión visual a Antigravity.
+- [ ] Corregir problemas críticos.
+- [ ] Documentar despliegue y recuperación.
+
+---
+
+## FASE 11 — Lanzamiento Comercial
+**Responsables: Kimi gratuito + Gemini gratuito | Claude solo para cambios técnicos**
+
+- [ ] Preparar nombre comercial de la primera plantilla.
+- [ ] Preparar descripción atractiva.
+- [ ] Definir precio inicial configurable.
+- [ ] Capturar imágenes reales del videojuego.
+- [ ] Grabar video corto de demostración.
+- [ ] Preparar anuncio de Facebook.
+- [ ] Preparar publicación de Instagram.
+- [ ] Preparar mensaje para WhatsApp.
+- [ ] Preparar respuestas a preguntas frecuentes.
+- [ ] Revisar precios y condiciones comerciales.
+- [ ] Revisar aviso de privacidad.
+- [ ] Probar una compra completa.
+- [ ] Publicar anuncios orgánicos.
+- [ ] Registrar consultas recibidas.
+- [ ] Medir solicitudes y compras reales.
+- [ ] Documentar mejoras sugeridas por clientes.
+
+---
+
+## FASE 12 — Segunda Plantilla: "Encuentra tu sorpresa"
+**Responsable: Claude Code**
+
+- [ ] Reutilizar sistema de pedidos.
+- [ ] Reutilizar personalizador.
+- [ ] Reutilizar sistema de enlaces.
+- [ ] Reutilizar dashboard.
+- [ ] Reutilizar exportador.
+- [ ] Implementar nueva mecánica.
+- [ ] Probar compatibilidad.
+- [ ] Agregar al catálogo.
+
+---
+
+## FASE 13 — Pagos Automáticos
+**Responsable: Claude Code | Auditoría: Codex**
+
+- [ ] Evaluar requisitos actuales de Mercado Pago.
+- [ ] Implementar Checkout oficial.
+- [ ] Implementar Webhooks verificados.
+- [ ] Comprobar monto, moneda y pedido.
+- [ ] Evitar pagos duplicados.
+- [ ] Activar automáticamente regalos pagados.
+- [ ] Probar pagos rechazados.
+- [ ] Probar reembolsos.
+- [ ] Auditar seguridad.
+- [ ] Documentar operación.

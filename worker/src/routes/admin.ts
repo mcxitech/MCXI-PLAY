@@ -1,0 +1,169 @@
+import { Repo } from '../lib/repo'
+import { json, jsonError, readJson } from '../lib/json'
+import { verifyPassword, createSessionCookie, clearSessionCookie, isAuthenticated } from '../lib/auth'
+import type { PersonalizationInput } from '../lib/validate'
+
+export async function handleAdminRoutes(
+  request: Request,
+  url: URL,
+  repo: Repo,
+  adminPasswordHash: string | undefined,
+): Promise<Response | null> {
+  const { pathname } = url
+  const method = request.method
+
+  if (!pathname.startsWith('/api/admin/')) return null
+
+  // Login — no auth required
+  if (method === 'POST' && pathname === '/api/admin/login') {
+    if (!adminPasswordHash) return jsonError('Admin no configurado', 503)
+    const body = (await readJson(request)) as Record<string, unknown> | null
+    const password = typeof body?.['password'] === 'string' ? body['password'] : ''
+    if (!password) return jsonError('Contraseña requerida', 400)
+
+    const valid = await verifyPassword(password, adminPasswordHash)
+    if (!valid) return jsonError('Contraseña incorrecta', 401)
+
+    const secure = url.protocol === 'https:'
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': createSessionCookie(secure),
+      },
+    })
+  }
+
+  // All other admin routes require auth
+  if (!isAuthenticated(request)) {
+    return jsonError('No autorizado', 401)
+  }
+
+  // POST /api/admin/logout
+  if (method === 'POST' && pathname === '/api/admin/logout') {
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': clearSessionCookie(),
+      },
+    })
+  }
+
+  // GET /api/admin/stats
+  if (method === 'GET' && pathname === '/api/admin/stats') {
+    const stats = await repo.getStats()
+    return json(stats)
+  }
+
+  // GET /api/admin/orders?status=...
+  if (method === 'GET' && pathname === '/api/admin/orders') {
+    const status = url.searchParams.get('status') || undefined
+    const search = url.searchParams.get('q') || undefined
+    const orders = await repo.listOrdersAdmin(status, search)
+    return json(orders)
+  }
+
+  // GET /api/admin/orders/:id
+  const orderDetailMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)$/i)
+  if (method === 'GET' && orderDetailMatch) {
+    const order = await repo.getOrderById(orderDetailMatch[1]!)
+    if (!order) return jsonError('Pedido no encontrado', 404)
+    const buyer = await repo.getBuyerById(order.buyer_id)
+    const gift = await repo.getGiftByOrderId(order.id)
+    const template = await repo.getTemplateById(order.template_id)
+    return json({
+      ...order,
+      personalization: JSON.parse(order.personalization),
+      buyer: buyer ? { name: buyer.name, email: buyer.email } : null,
+      gift: gift ? { publicSlug: gift.public_slug, buyerToken: gift.buyer_token, playCount: gift.play_count, active: Boolean(gift.active) } : null,
+      templateName: template?.name,
+    })
+  }
+
+  // PATCH /api/admin/orders/:id/pay
+  const payMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/pay$/i)
+  if (method === 'PATCH' && payMatch) {
+    const order = await repo.getOrderById(payMatch[1]!)
+    if (!order) return jsonError('Pedido no encontrado', 404)
+    if (order.status !== 'pending') return jsonError('Solo se pueden confirmar pedidos pendientes', 400)
+
+    const body = (await readJson(request)) as Record<string, unknown> | null
+    const note = typeof body?.['paymentNote'] === 'string' ? body['paymentNote'].slice(0, 200) : undefined
+
+    await repo.updateOrderStatus(order.id, 'paid', {
+      payment_date: new Date().toISOString(),
+      payment_note: note,
+    })
+    await repo.auditLog('payment.confirmed', 'order', order.id, 'admin', { note })
+    return json({ ok: true, status: 'paid' })
+  }
+
+  // PATCH /api/admin/orders/:id/activate
+  const activateMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/activate$/i)
+  if (method === 'PATCH' && activateMatch) {
+    const order = await repo.getOrderById(activateMatch[1]!)
+    if (!order) return jsonError('Pedido no encontrado', 404)
+    if (order.status !== 'paid') return jsonError('Solo se pueden activar pedidos pagados', 400)
+
+    const existing = await repo.getGiftByOrderId(order.id)
+    if (existing) return jsonError('El regalo ya fue activado', 400)
+
+    const personalization = JSON.parse(order.personalization) as PersonalizationInput
+    const gift = await repo.createGift(order.id, personalization)
+    await repo.updateOrderStatus(order.id, 'activated')
+    await repo.auditLog('gift.activated', 'order', order.id, 'admin', {
+      giftId: gift.id,
+      publicSlug: gift.public_slug,
+    })
+    return json({ ok: true, status: 'activated', publicSlug: gift.public_slug, buyerToken: gift.buyer_token })
+  }
+
+  // PATCH /api/admin/orders/:id/cancel
+  const cancelMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/cancel$/i)
+  if (method === 'PATCH' && cancelMatch) {
+    const order = await repo.getOrderById(cancelMatch[1]!)
+    if (!order) return jsonError('Pedido no encontrado', 404)
+    if (order.status === 'cancelled') return jsonError('El pedido ya está cancelado', 400)
+
+    await repo.updateOrderStatus(order.id, 'cancelled')
+    await repo.auditLog('order.cancelled', 'order', order.id, 'admin')
+    return json({ ok: true, status: 'cancelled' })
+  }
+
+  // GET /api/admin/templates
+  if (method === 'GET' && pathname === '/api/admin/templates') {
+    const templates = await repo.listAllTemplates()
+    return json(templates)
+  }
+
+  // PATCH /api/admin/templates/:id
+  const tplMatch = pathname.match(/^\/api\/admin\/templates\/([A-Z0-9]+)$/i)
+  if (method === 'PATCH' && tplMatch) {
+    const template = await repo.getTemplateById(tplMatch[1]!)
+    if (!template) return jsonError('Plantilla no encontrada', 404)
+
+    const body = (await readJson(request)) as Record<string, unknown> | null
+    if (!body) return jsonError('Body requerido', 400)
+
+    const updates: Record<string, unknown> = {}
+    if (typeof body['price_mxn'] === 'number' && body['price_mxn'] > 0) updates['price_mxn'] = body['price_mxn']
+    if (typeof body['active'] === 'number' && (body['active'] === 0 || body['active'] === 1)) updates['active'] = body['active']
+    if (typeof body['name'] === 'string' && body['name'].length > 0) updates['name'] = body['name'].slice(0, 100)
+    if (typeof body['description'] === 'string' && body['description'].length > 0) updates['description'] = body['description'].slice(0, 500)
+
+    if (Object.keys(updates).length === 0) return jsonError('Sin cambios válidos', 400)
+
+    await repo.updateTemplate(template.id, updates)
+    await repo.auditLog('template.updated', 'template', template.id, 'admin', updates)
+    return json({ ok: true })
+  }
+
+  // GET /api/admin/audit
+  if (method === 'GET' && pathname === '/api/admin/audit') {
+    const logs = await repo.listAuditLog(50)
+    return json(logs)
+  }
+
+  return null
+}

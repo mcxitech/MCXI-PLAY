@@ -139,6 +139,29 @@ export async function handleAdminRoutes(
     return json({ ok: true, status: 'cancelled' })
   }
 
+  // PATCH /api/admin/orders/:id/rotate-token — revoke buyer's private link and issue a new one
+  const rotateMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/rotate-token$/i)
+  if (method === 'PATCH' && rotateMatch) {
+    const gift = await repo.getGiftByOrderId(rotateMatch[1]!)
+    if (!gift) return jsonError('El pedido no tiene regalo activado', 404)
+    const buyerToken = await repo.rotateBuyerToken(gift.id)
+    await repo.auditLog('gift.token_rotated', 'order', gift.order_id, 'admin')
+    return json({ ok: true, buyerToken })
+  }
+
+  // PATCH /api/admin/orders/:id/gift-access — enable/disable the recipient's public link
+  const accessMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/gift-access$/i)
+  if (method === 'PATCH' && accessMatch) {
+    const gift = await repo.getGiftByOrderId(accessMatch[1]!)
+    if (!gift) return jsonError('El pedido no tiene regalo activado', 404)
+    const body = (await readJson(request)) as Record<string, unknown> | null
+    if (typeof body?.['active'] !== 'boolean') return jsonError('Campo active (boolean) requerido', 400)
+    const active = body['active']
+    await repo.setGiftActive(gift.id, active)
+    await repo.auditLog(active ? 'gift.enabled' : 'gift.disabled', 'order', gift.order_id, 'admin')
+    return json({ ok: true, active })
+  }
+
   // GET /api/admin/templates
   if (method === 'GET' && pathname === '/api/admin/templates') {
     const templates = await repo.listAllTemplates()

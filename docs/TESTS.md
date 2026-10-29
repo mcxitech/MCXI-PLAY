@@ -78,6 +78,27 @@
 | Gift link and buyer manage link | `/api/gifts/:slug`, `/api/gifts/manage/:token` | 200 | 2026-10-29 |
 | Logout, then stats | `.../admin/stats` | 401 | 2026-10-29 |
 
+## Phase 7
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Build + worker typecheck | `npm run build`, `npx tsc -p worker/tsconfig.json --noEmit` | Pass | 2026-10-29 |
+| SPA deep links | `curl -H 'Sec-Fetch-Mode: navigate'` on `/pedido/X`, `/regalo/X`, `/mi-regalo/X`, `/admin` | 200 (was 404) | 2026-10-29 |
+| `/api/*` still served by Worker | `curl /api/nope` | 404 JSON from Worker | 2026-10-29 |
+| Two independent orders | `POST /api/orders` x2 | Distinct order numbers, configs kept separate | 2026-10-29 |
+| Activate without payment | `PATCH .../activate` | 400 | 2026-10-29 |
+| Pay/activate without session | `PATCH .../pay`, `PATCH .../activate` | 401 | 2026-10-29 |
+| Payment date + note recorded | `GET /api/admin/orders/:id` | status, payment_date, payment_note present | 2026-10-29 |
+| Recipient link per gift | `GET /api/gifts/:slug` | Each returns its own config; only `config` + `playCount` keys | 2026-10-29 |
+| Buyer link per gift | `GET /api/gifts/manage/:token` | Each returns its own order | 2026-10-29 |
+| Slug used as buyer token | `GET /api/gifts/manage/:slug` | 404 | 2026-10-29 |
+| Rotate buyer token | `PATCH .../rotate-token` | Old token 404, new token 200 | 2026-10-29 |
+| Rotate without session | `PATCH .../rotate-token` | 401 | 2026-10-29 |
+| Disable recipient link | `PATCH .../gift-access {active:false}` | Gift 404, buyer sees active=false, other gift unaffected | 2026-10-29 |
+| Re-enable recipient link | `PATCH .../gift-access {active:true}` | 200 | 2026-10-29 |
+| Audit trail | `GET /api/admin/audit` | gift.enabled, gift.disabled, gift.token_rotated, gift.activated | 2026-10-29 |
+
 ## Manual Tests Pending
 - Admin login through the browser UI after the session-cookie change.
+- Phase 7 in browser (desktop + phone): customize → submit order → `/pedido` page → admin pay/activate → copy links → `/mi-regalo` → `/regalo` played to the end.
 - Lint is broken until TypeScript and typescript-eslint versions are aligned.

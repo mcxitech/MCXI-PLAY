@@ -7,6 +7,9 @@ import PrivacyPage from '@/pages/PrivacyPage'
 import TermsPage from '@/pages/TermsPage'
 import DemoPage from '@/pages/DemoPage'
 import CustomizePage from '@/pages/CustomizePage'
+import OrderPage from '@/pages/OrderPage'
+import GiftPage from '@/pages/GiftPage'
+import BuyerManagePage from '@/pages/BuyerManagePage'
 import AdminLoginPage from '@/pages/admin/AdminLoginPage'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminOrders from '@/pages/admin/AdminOrders'
@@ -23,6 +26,8 @@ function App() {
           <Route path="juego/:slug" element={<GameDetailPage />} />
           <Route path="demo/:slug" element={<DemoPage />} />
           <Route path="personalizar/:slug" element={<CustomizePage />} />
+          <Route path="pedido/:orderNumber" element={<OrderPage />} />
+          <Route path="mi-regalo/:buyerToken" element={<BuyerManagePage />} />
           <Route path="privacidad" element={<PrivacyPage />} />
           <Route path="condiciones" element={<TermsPage />} />
           <Route
@@ -37,6 +42,8 @@ function App() {
             }
           />
         </Route>
+        {/* Recipient page has no site chrome: the gift is the whole screen */}
+        <Route path="regalo/:publicSlug" element={<GiftPage />} />
         <Route path="admin/login" element={<AdminLoginPage />} />
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />

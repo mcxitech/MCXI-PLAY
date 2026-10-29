@@ -168,6 +168,19 @@ export class Repo {
     return this.db.prepare('SELECT * FROM gifts WHERE order_id = ?').bind(orderId).first<Gift>()
   }
 
+  // Revokes the buyer's private link by replacing the token; the old URL stops working
+  async rotateBuyerToken(giftId: string): Promise<string> {
+    const token = generateBuyerToken()
+    await this.db.prepare('UPDATE gifts SET buyer_token = ?, updated_at = ? WHERE id = ?')
+      .bind(token, new Date().toISOString(), giftId).run()
+    return token
+  }
+
+  async setGiftActive(giftId: string, active: boolean): Promise<void> {
+    await this.db.prepare('UPDATE gifts SET active = ?, updated_at = ? WHERE id = ?')
+      .bind(active ? 1 : 0, new Date().toISOString(), giftId).run()
+  }
+
   async incrementPlayCount(giftId: string): Promise<void> {
     await this.db.prepare('UPDATE gifts SET play_count = play_count + 1, updated_at = ? WHERE id = ?')
       .bind(new Date().toISOString(), giftId).run()

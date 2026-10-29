@@ -31,7 +31,7 @@ MCXI Play is a web platform where visitors buy personalized videogames as gifts 
 5. Receives order number + payment instructions on screen and by reference.
 6. Makes payment externally (bank transfer, deposit, etc.).
 7. Waits for admin confirmation.
-8. Once activated, receives a private management link (via order lookup page).
+8. Once activated, the admin sends the buyer their private management link through a private channel (WhatsApp/email). The public order lookup never reveals links (D015).
 9. From management page: sees gift link to share, can request ZIP download.
 
 ### Recipient Flow
@@ -200,7 +200,9 @@ audit_log
 | GET | `/api/admin/orders` | Admin | List all orders |
 | PATCH | `/api/admin/orders/:id/pay` | Admin | Confirm payment |
 | PATCH | `/api/admin/orders/:id/activate` | Admin | Activate gift |
-| PATCH | `/api/admin/orders/:id/cancel` | Admin | Cancel order |
+| PATCH | `/api/admin/orders/:id/cancel` | Admin | Cancel order (pending/paid only) |
+| PATCH | `/api/admin/orders/:id/rotate-token` | Admin | Revoke buyer link, issue new token |
+| PATCH | `/api/admin/orders/:id/gift-access` | Admin | Enable/disable recipient link |
 | GET | `/api/admin/templates` | Admin | List all templates |
 | PATCH | `/api/admin/templates/:id` | Admin | Update template |
 | GET | `/api/admin/gifts/:id/export` | Admin | Generate ZIP |

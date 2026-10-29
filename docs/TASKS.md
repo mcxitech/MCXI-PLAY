@@ -154,22 +154,22 @@
 ## FASE 7 — Pedidos, Activación y Enlaces
 **Responsable: Claude Code**
 
-- [ ] Crear formulario para solicitar compra.
-- [ ] Generar número de pedido.
-- [ ] Registrar pedido pendiente.
-- [ ] Mostrar instrucciones de pago.
-- [ ] Permitir confirmar manualmente el pago desde el dashboard.
-- [ ] Registrar fecha y estado de pago.
-- [ ] Activar regalo solamente desde una operación autorizada.
-- [ ] Generar identificador público aleatorio.
-- [ ] Crear enlace exclusivo del destinatario.
-- [ ] Crear token privado de gestión del comprador.
-- [ ] Separar los permisos de ambos enlaces.
-- [ ] Implementar revocación de acceso privado.
-- [ ] Crear página del destinatario.
-- [ ] Crear página de gestión del comprador.
-- [ ] Impedir el acceso a regalos pendientes.
-- [ ] Probar múltiples compras independientes.
+- [ ] Crear formulario para solicitar compra. (Implementado en el resumen de `CustomizePage`; API verificada. Falta probarlo en navegador.)
+- [x] Generar número de pedido.
+- [x] Registrar pedido pendiente.
+- [ ] Mostrar instrucciones de pago. (`OrderPage` implementada; falta probar en navegador y poner datos bancarios reales en `PAYMENT_INFO`.)
+- [x] Permitir confirmar manualmente el pago desde el dashboard.
+- [x] Registrar fecha y estado de pago.
+- [x] Activar regalo solamente desde una operación autorizada.
+- [x] Generar identificador público aleatorio.
+- [x] Crear enlace exclusivo del destinatario.
+- [x] Crear token privado de gestión del comprador.
+- [x] Separar los permisos de ambos enlaces.
+- [x] Implementar revocación de acceso privado.
+- [ ] Crear página del destinatario. (`GiftPage` implementada; API verificada. Falta jugarla en navegador/celular.)
+- [ ] Crear página de gestión del comprador. (`BuyerManagePage` implementada; API verificada. Falta probar en navegador.)
+- [x] Impedir el acceso a regalos pendientes.
+- [x] Probar múltiples compras independientes.
 
 ---
 

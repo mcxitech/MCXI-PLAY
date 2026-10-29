@@ -27,6 +27,15 @@ export const GAME_TEMPLATES: GameTemplate[] = [
   },
 ]
 
+// Manual payment details shown on the order page.
+// TODO(owner): replace the placeholders with the real account before launch.
+export const PAYMENT_INFO = {
+  bank: '[Banco por configurar]',
+  holder: '[Titular por configurar]',
+  clabe: '[CLABE por configurar]',
+  contact: '[WhatsApp o email por configurar]',
+}
+
 export function formatPriceMXN(price: number): string {
   return `$${price.toLocaleString('es-MX')} MXN`
 }

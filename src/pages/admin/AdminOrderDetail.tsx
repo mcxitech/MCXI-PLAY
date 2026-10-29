@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { adminApi, type OrderDetail } from '@/lib/admin-api'
+import CopyButton from '@/components/CopyButton'
+
+const SMALL_BTN = 'bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs shrink-0'
 
 export default function AdminOrderDetail() {
   const { id } = useParams<{ id: string }>()
@@ -22,13 +25,17 @@ export default function AdminOrderDetail() {
 
   useEffect(load, [id, navigate])
 
-  const doAction = async (action: 'pay' | 'activate' | 'cancel') => {
+  const doAction = async (action: 'pay' | 'activate' | 'cancel' | 'rotate' | 'disable' | 'enable') => {
     if (!id) return
+    if (action === 'rotate' && !confirm('El enlace de gestión actual dejará de funcionar. ¿Continuar?')) return
+    if (action === 'disable' && !confirm('El destinatario ya no podrá abrir el regalo. ¿Continuar?')) return
     setActionLoading(true)
     try {
       if (action === 'pay') await adminApi.pay(id, paymentNote || undefined)
       else if (action === 'activate') await adminApi.activate(id)
-      else await adminApi.cancel(id)
+      else if (action === 'cancel') await adminApi.cancel(id)
+      else if (action === 'rotate') await adminApi.rotateToken(id)
+      else await adminApi.setGiftAccess(id, action === 'enable')
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error')
@@ -66,11 +73,31 @@ export default function AdminOrderDetail() {
         {order.gift && (
           <div>
             <h2 className="text-sm text-slate-400 mb-1">Regalo</h2>
-            <div className="text-sm space-y-1">
-              <p>Slug público: <code className="text-purple-400">{order.gift.publicSlug}</code></p>
-              <p>Token comprador: <code className="text-purple-400">{order.gift.buyerToken}</code></p>
+            <div className="text-sm space-y-3">
+              <LinkRow
+                label="Enlace del destinatario (para compartir)"
+                url={`${window.location.origin}/regalo/${order.gift.publicSlug}`}
+              />
+              <LinkRow
+                label="Enlace privado del comprador (enviar solo al comprador)"
+                url={`${window.location.origin}/mi-regalo/${order.gift.buyerToken}`}
+              />
               <p>Veces jugado: {order.gift.playCount}</p>
-              <p>Activo: {order.gift.active ? 'Sí' : 'No'}</p>
+              <p>Enlace del destinatario activo: {order.gift.active ? 'Sí' : 'No'}</p>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => doAction('rotate')} disabled={actionLoading} className={SMALL_BTN}>
+                  Revocar y regenerar enlace del comprador
+                </button>
+                {order.gift.active ? (
+                  <button onClick={() => doAction('disable')} disabled={actionLoading} className={SMALL_BTN}>
+                    Desactivar enlace del destinatario
+                  </button>
+                ) : (
+                  <button onClick={() => doAction('enable')} disabled={actionLoading} className={SMALL_BTN}>
+                    Reactivar enlace del destinatario
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -129,6 +156,18 @@ export default function AdminOrderDetail() {
         {(order.status === 'activated' || order.status === 'cancelled') && (
           <p className="text-slate-500 text-sm">No hay acciones disponibles para este estado.</p>
         )}
+      </div>
+    </div>
+  )
+}
+
+function LinkRow({ label, url }: { label: string; url: string }) {
+  return (
+    <div>
+      <p className="text-slate-400 text-xs mb-1">{label}</p>
+      <div className="flex items-center gap-2">
+        <code className="text-purple-400 break-all text-xs flex-1 min-w-0">{url}</code>
+        <CopyButton text={url} className={SMALL_BTN} />
       </div>
     </div>
   )

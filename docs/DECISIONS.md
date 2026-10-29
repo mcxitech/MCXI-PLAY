@@ -78,3 +78,14 @@
 **Date:** 2026-10-29
 **Decision:** All random identifiers use `crypto.getRandomValues` with rejection sampling. The public order lookup never returns `giftSlug` or `buyerToken`; the admin delivers links privately.
 **Reason:** Fixes SEC-002 and SEC-003.
+
+## D015 — Admin delivers gift links privately; revocation by token rotation
+**Date:** 2026-10-29
+**Decision:** After activation the admin copies both links from the order detail and sends them to the buyer (WhatsApp/email). Buyer access is revoked by rotating `buyer_token`; the recipient link is revoked by `gifts.active = 0`. Pages set `referrer: no-referrer` so tokens in URLs are not leaked to other sites.
+**Alternatives:** Show links on the public order page (rejected: SEC-002); automatic email (needs an extra service, out of MVP).
+**Reason:** Manual payments already require contacting the buyer; no extra infrastructure.
+
+## D016 — SPA fallback in Workers Static Assets
+**Date:** 2026-10-29
+**Decision:** `not_found_handling = "single-page-application"` and `run_worker_first = ["/api/*"]` in `wrangler.toml`.
+**Reason:** Without it, direct links such as `/regalo/:slug` returned 404 in `wrangler dev` (and would in production).

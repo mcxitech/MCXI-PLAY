@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import PhaserGame from '@/components/PhaserGame'
 import { GAME_TEMPLATES, formatPriceMXN } from '@/lib/constants'
 import { sanitizeText, LIMITS } from '@/lib/sanitize'
+import { api } from '@/lib/api'
 import type { GameConfig } from '@/game/config'
 import { DEFAULT_CONFIG } from '@/game/config'
 
@@ -33,6 +34,11 @@ export default function CustomizePage() {
   const [secondaryColor, setSecondaryColor] = useState('#9c27b0')
   const [step, setStep] = useState<Step>('form')
   const [previewKey, setPreviewKey] = useState(0)
+  const [buyerName, setBuyerName] = useState('')
+  const [buyerEmail, setBuyerEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const navigate = useNavigate()
 
   const gameConfig = useMemo<GameConfig>(
     () => ({
@@ -50,6 +56,26 @@ export default function CustomizePage() {
     recipientName.trim().length > 0 &&
     senderName.trim().length > 0 &&
     dedication.trim().length > 0
+
+  const buyerValid = buyerName.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail.trim())
+
+  const submitOrder = async () => {
+    if (!game || !isValid || !buyerValid || submitting) return
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const order = await api.createOrder({
+        buyerName: buyerName.trim(),
+        buyerEmail: buyerEmail.trim(),
+        templateSlug: game.slug,
+        personalization: gameConfig,
+      })
+      navigate(`/pedido/${order.orderNumber}`)
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'No se pudo registrar el pedido')
+      setSubmitting(false)
+    }
+  }
 
   if (!game) {
     return (
@@ -304,6 +330,30 @@ export default function CustomizePage() {
               <span className="text-purple-300">Total</span>
               <span className="text-2xl font-bold text-purple-400">{formatPriceMXN(game.priceMxn)}</span>
             </div>
+            <div className="border-t border-purple-900/30 pt-4 space-y-4">
+              <h3 className="text-white font-semibold text-sm">Tus datos de contacto</h3>
+              <Field
+                label="Tu nombre completo"
+                value={buyerName}
+                onChange={(v) => setBuyerName(sanitizeText(v, 60))}
+                maxLength={60}
+                placeholder="Para identificar tu pago"
+                required
+              />
+              <div>
+                <label className="block text-sm font-medium text-purple-200 mb-1">Tu email</label>
+                <input
+                  type="email"
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value.slice(0, 120))}
+                  maxLength={120}
+                  placeholder="tucorreo@ejemplo.com"
+                  autoComplete="email"
+                  required
+                  className="w-full bg-slate-800 border border-purple-900/50 rounded-lg px-3 py-2 text-white placeholder-purple-600 text-sm focus:outline-none focus:border-purple-500"
+                />
+              </div>
+            </div>
             <div className="flex flex-col gap-3 pt-2">
               <Link
                 to={`/personalizar/${game.slug}`}
@@ -315,15 +365,18 @@ export default function CustomizePage() {
               >
                 Volver a vista previa
               </Link>
+              {submitError && <p className="text-sm text-red-400 text-center">{submitError}</p>}
               <button
                 type="button"
-                className="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl transition-colors"
-                onClick={() => {
-                  // Phase 7 will implement the actual purchase flow
-                  alert('La función de compra se habilitará próximamente.')
-                }}
+                disabled={!buyerValid || submitting}
+                className="bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:text-purple-600 text-white font-semibold py-2.5 rounded-xl transition-colors"
+                onClick={submitOrder}
               >
-                Solicitar compra — {formatPriceMXN(game.priceMxn)}
+                {submitting
+                  ? 'Registrando pedido...'
+                  : buyerValid
+                    ? `Solicitar compra — ${formatPriceMXN(game.priceMxn)}`
+                    : 'Escribe tu nombre y email'}
               </button>
               <p className="text-xs text-purple-500 text-center">
                 Al solicitar la compra recibirás instrucciones de pago. No se realiza ningún cobro automático.

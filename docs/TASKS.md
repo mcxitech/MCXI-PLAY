@@ -154,10 +154,10 @@
 ## FASE 7 — Pedidos, Activación y Enlaces
 **Responsable: Claude Code**
 
-- [ ] Crear formulario para solicitar compra. (Implementado en el resumen de `CustomizePage`; API verificada. Falta probarlo en navegador.)
+- [x] Crear formulario para solicitar compra. (Verificado en Chrome headless 390x844.)
 - [x] Generar número de pedido.
 - [x] Registrar pedido pendiente.
-- [ ] Mostrar instrucciones de pago. (`OrderPage` implementada; falta probar en navegador y poner datos bancarios reales en `PAYMENT_INFO`.)
+- [x] Mostrar instrucciones de pago. (Verificado en navegador. Datos reales pendientes en `PAYMENT_INFO`, ver HANDOFF.)
 - [x] Permitir confirmar manualmente el pago desde el dashboard.
 - [x] Registrar fecha y estado de pago.
 - [x] Activar regalo solamente desde una operación autorizada.

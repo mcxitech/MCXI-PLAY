@@ -68,7 +68,7 @@
 | Install | `npm ci` (with `.npmrc` legacy-peer-deps) | Pass — 0 vulnerabilities | 2026-10-29 |
 | Full build | `npm run build` | Pass | 2026-10-29 |
 | Worker typecheck | `npx tsc -p worker/tsconfig.json --noEmit` | Pass | 2026-10-29 |
-| Lint | `npm run lint` | **FAIL** — typescript-eslint 8.72 does not support TypeScript 7 | 2026-10-29 |
+| Lint | `npm run lint` | FAIL with TS 7 → Pass after D018 (TS 6.0.3) | 2026-10-29 |
 | Forged unsigned cookie (SEC-001) | `curl -H 'Cookie: mcxi_admin_session=<base64 {exp}>' .../admin/stats` | 401 | 2026-10-29 |
 | Cookie with fake signature | `curl -H 'Cookie: mcxi_admin_session=<payload>.AAAA' .../admin/stats` | 401 | 2026-10-29 |
 | Valid login + stats | login, then `.../admin/stats` | 200 | 2026-10-29 |
@@ -120,4 +120,3 @@ Browser tests use headless Chrome driven over CDP (scripts kept outside the repo
 - Customize form → "Solicitar compra" → `/pedido` page in a real browser (desktop + phone). Not clicked yet.
 - Play a gift to the end (dedication screen) on a real phone, both online and from an exported ZIP.
 - Exported ZIP served over http (`python -m http.server` / `npx serve`) and in Safari/Firefox: not verified.
-- Lint is broken until TypeScript and typescript-eslint versions are aligned.

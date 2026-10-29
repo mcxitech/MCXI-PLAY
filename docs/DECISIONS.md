@@ -96,3 +96,8 @@
 **Alternatives:** Generate the ZIP in the Worker (rejected: compressing ~1.2 MB exceeds the ~10 ms CPU limit of the free plan); pre-built ZIP per gift in storage (needs R2/KV, extra infrastructure).
 **Reason:** $0, no CPU limit, no new endpoints. The engine is public anyway (it ships in the SPA); only the config needs authorization.
 **Trade-off:** Downloads are not recorded in the audit log.
+
+## D018 — TypeScript 6.0 instead of 7.0
+**Date:** 2026-10-29
+**Decision:** Pin `typescript@~6.0.3`. Removed `.npmrc` (`legacy-peer-deps`), no longer needed.
+**Reason:** typescript-eslint 8.x supports TypeScript <6.1 only, so `npm run lint` crashed with 7.0. Same language; code compiles unchanged. Revisit when typescript-eslint supports 7.x.

@@ -255,12 +255,102 @@ test('disabling the recipient link blocks only that gift', async () => {
 
 // ---- Static assets ----
 
-test('SPA deep links resolve and export engine is served as JavaScript', async () => {
+test('SPA deep links resolve', async () => {
   for (const path of ['/regalo/x', '/mi-regalo/x', '/pedido/x', '/admin']) {
     const r = await fetch(`${BASE}${path}`, { headers: { Accept: 'text/html', 'Sec-Fetch-Mode': 'navigate' } })
     assert.equal(r.status, 200, path)
   }
-  const engine = await fetch(`${BASE}/export-kit/game.js`)
-  assert.equal(engine.status, 200)
-  assert.match(engine.headers.get('content-type') ?? '', /javascript/)
+})
+
+// ---- Demo vs paid product (D020) ----
+
+const engine = (path, opts) => call(path, opts)
+const isEngineFor = (r, name) =>
+  r.status === 200 && /javascript/.test(r.headers.get('content-type') ?? '') &&
+  typeof r.data === 'string' && r.data.startsWith('window.MCXI_GIFT_CONFIG = ') && r.data.includes(`"recipientName":"${name}"`)
+
+test('1. demo/public bundle cannot export: paid engine is not publicly reachable', async () => {
+  for (const path of ['/export-kit/game.js', '/export-kit/', '/export-kit/../export-kit/game.js']) {
+    const r = await fetch(`${BASE}${path}`)
+    assert.equal(r.status, 404, path)
+  }
+  // The public SPA ships only the preview edition of the game
+  const html = await (await fetch(`${BASE}/`)).text()
+  const mainJs = html.match(/src="(\/assets\/index-[^"]+\.js)"/)[1]
+  const main = await (await fetch(`${BASE}${mainJs}`)).text()
+  const chunk = main.match(/createGame-[A-Za-z0-9_-]+\.js/)[0]
+  const game = await (await fetch(`${BASE}/assets/${chunk}`)).text()
+  assert.ok(game.includes('VISTA PREVIA'), 'public game must carry the preview watermark')
+  assert.ok(!main.includes('MCXI_GIFT_CONFIG') && !game.includes('MCXI_GIFT_CONFIG'), 'public bundle must not read gift configs')
+})
+
+test('2. pending order cannot get a ZIP/engine', async () => {
+  const id = await orderId(await createOrder())
+  assert.equal((await engine(`/api/admin/orders/${id}/engine.js`, { cookie: admin })).status, 409)
+  const detail = await call(`/api/admin/orders/${id}`, { cookie: admin })
+  assert.equal(detail.data.gift, null, 'no slug/token exists before activation')
+})
+
+test('3. paid but not activated order cannot get a ZIP/engine', async () => {
+  const { id } = await paidOrder()
+  assert.equal((await engine(`/api/admin/orders/${id}/engine.js`, { cookie: admin })).status, 409)
+  assert.equal((await call(`/api/admin/orders/${id}`, { cookie: admin })).data.gift, null)
+})
+
+test('cancelled order cannot get a ZIP/engine', async () => {
+  const id = await orderId(await createOrder())
+  await call(`/api/admin/orders/${id}/cancel`, { method: 'PATCH', cookie: admin })
+  assert.equal((await engine(`/api/admin/orders/${id}/engine.js`, { cookie: admin })).status, 409)
+})
+
+test('4. activated order exports only its own config (buyer, recipient, admin)', async () => {
+  const o = await activatedOrder({ personalization: personalization({ recipientName: 'Propia' }) })
+  for (const r of [
+    await engine(`/api/gifts/manage/${o.token}/engine.js`),
+    await engine(`/api/gifts/${o.slug}/engine.js`),
+    await engine(`/api/admin/orders/${o.id}/engine.js`, { cookie: admin }),
+  ]) {
+    assert.ok(isEngineFor(r, 'Propia'), `status ${r.status}`)
+    assert.equal(r.headers.get('cache-control'), 'private, no-store')
+    // Exactly one config object, and no buyer data
+    assert.equal(r.data.split('MCXI_GIFT_CONFIG = ').length, 2)
+    assert.ok(!r.data.includes('prueba@ejemplo.com') && !r.data.includes(o.token))
+  }
+  assert.ok(!(await engine(`/api/gifts/${o.slug}/engine.js`)).data.includes('VISTA PREVIA'), 'paid engine has no watermark')
+})
+
+test('5. a buyer cannot export another order', async () => {
+  const a = await activatedOrder({ personalization: personalization({ recipientName: 'DeA' }) })
+  const b = await activatedOrder({ personalization: personalization({ recipientName: 'DeB' }) })
+  const ra = await engine(`/api/gifts/manage/${a.token}/engine.js`)
+  assert.ok(isEngineFor(ra, 'DeA') && !ra.data.includes('DeB'))
+  // Admin export endpoint is not reachable with a buyer token or without session
+  assert.equal((await engine(`/api/admin/orders/${b.id}/engine.js`)).status, 401)
+  assert.equal((await engine(`/api/admin/orders/${b.id}/engine.js`, { cookie: `mcxi_admin_session=${a.token}` })).status, 401)
+})
+
+test('6. tampering with the request does not bypass restrictions', async () => {
+  const a = await activatedOrder({ personalization: personalization({ recipientName: 'Manipulada' }) })
+  const b = await activatedOrder()
+  const flip = (s) => s.slice(0, -1) + (s.endsWith('A') ? 'B' : 'A')
+  const cases = [
+    `/api/gifts/manage/${flip(a.token)}/engine.js`, // altered token
+    `/api/gifts/manage/${a.slug}/engine.js`, // recipient slug used as buyer token
+    `/api/gifts/manage/${a.token.slice(0, 12)}/engine.js`, // truncated token
+    `/api/gifts/${flip(a.slug)}/engine.js`, // altered slug
+    `/api/gifts/manage/x' OR '1'='1/engine.js`, // injection-shaped
+  ]
+  for (const path of cases) assert.equal((await engine(path)).status, 404, path)
+  // Extra parameters are ignored: still only A's config
+  const q = await engine(`/api/gifts/manage/${a.token}/engine.js?orderId=${b.id}&recipientName=Hacker&status=activated`)
+  assert.ok(isEngineFor(q, 'Manipulada') && !q.data.includes('Hacker'))
+  // Only GET is served
+  assert.equal((await call(`/api/gifts/manage/${a.token}/engine.js`, { method: 'POST', body: { recipientName: 'Hacker' } })).status, 404)
+  // Disabled recipient link blocks recipient play AND buyer export
+  await call(`/api/admin/orders/${a.id}/gift-access`, { method: 'PATCH', body: { active: false }, cookie: admin })
+  assert.equal((await engine(`/api/gifts/${a.slug}/engine.js`)).status, 404)
+  assert.equal((await engine(`/api/gifts/manage/${a.token}/engine.js`)).status, 404)
+  // Rotated buyer token: old token can no longer export
+  await call(`/api/admin/orders/${b.id}/rotate-token`, { method: 'PATCH', cookie: admin })
+  assert.equal((await engine(`/api/gifts/manage/${b.token}/engine.js`)).status, 404)
 })

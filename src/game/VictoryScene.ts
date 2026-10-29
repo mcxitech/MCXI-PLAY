@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import type { GameConfig } from './config'
 import { DEFAULT_CONFIG, hexToNumber } from './config'
+import { addPreviewWatermark, dedicationForEdition, IS_FULL_EDITION } from './edition'
 
 export default class VictoryScene extends Phaser.Scene {
   private gameConfig: GameConfig = DEFAULT_CONFIG
@@ -48,7 +49,7 @@ export default class VictoryScene extends Phaser.Scene {
     dedBox.fillRoundedRect(width / 2 - dedWidth / 2, centerY - 10, dedWidth, 80, 12)
 
     this.add
-      .text(width / 2, centerY + 30, `"${this.gameConfig.dedication}"`, {
+      .text(width / 2, centerY + 30, `"${dedicationForEdition(this.gameConfig.dedication)}"`, {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '15px',
         color: '#e9d5ff',
@@ -66,7 +67,18 @@ export default class VictoryScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
 
-    const btnY = centerY + 140
+    if (!IS_FULL_EDITION) {
+      this.add
+        .text(width / 2, centerY + 112, 'El mensaje completo se desbloquea al comprar', {
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: '12px',
+          color: '#fbbf24',
+        })
+        .setOrigin(0.5)
+    }
+    addPreviewWatermark(this)
+
+    const btnY = centerY + 150
     const btn = this.add.graphics()
     btn.fillStyle(primary, 1)
     btn.fillRoundedRect(width / 2 - 80, btnY - 18, 160, 36, 8)

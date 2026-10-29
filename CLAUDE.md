@@ -23,6 +23,7 @@ Commercial platform for personalized gift videogames. React + Vite + TypeScript 
 - Update docs/TASKS.md, docs/HANDOFF.md after each task.
 - Run build before marking a task complete.
 - Stop at phase boundary and wait for approval.
+- **Security (permanent):** demo/preview never yields a full or exportable gift. Full engine and ZIP only via server-checked `activated` orders. Never rely on hiding frontend code. See "Permanent Requirement: Demo vs Paid Product" in docs/PROJECT.md and D020.
 
 ## Commands
 - `npm run dev` — Start Vite dev server

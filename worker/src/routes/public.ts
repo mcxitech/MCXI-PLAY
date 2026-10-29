@@ -1,14 +1,32 @@
 import { Repo } from '../lib/repo'
 import { json, jsonError, readJson } from '../lib/json'
 import { validateOrderInput } from '../lib/validate'
+import { engineResponse } from '../lib/engine'
 
 export async function handlePublicRoutes(
   request: Request,
   url: URL,
   repo: Repo,
+  assets: Fetcher,
 ): Promise<Response | null> {
   const { pathname } = url
   const method = request.method
+
+  // GET /api/gifts/:publicSlug/engine.js — full game for the recipient (activated + active only)
+  const playEngine = pathname.match(/^\/api\/gifts\/([a-zA-Z0-9]+)\/engine\.js$/)
+  if (method === 'GET' && playEngine) {
+    const gift = await repo.getGiftByPublicSlug(playEngine[1]!)
+    if (!gift) return jsonError('Regalo no encontrado', 404)
+    return engineResponse(assets, url, gift.config)
+  }
+
+  // GET /api/gifts/manage/:buyerToken/engine.js — buyer's ZIP export (activated + active only)
+  const exportEngine = pathname.match(/^\/api\/gifts\/manage\/([a-zA-Z0-9]+)\/engine\.js$/)
+  if (method === 'GET' && exportEngine) {
+    const gift = await repo.getGiftByBuyerToken(exportEngine[1]!)
+    if (!gift || !gift.active) return jsonError('Regalo no encontrado', 404)
+    return engineResponse(assets, url, gift.config)
+  }
 
   // GET /api/templates
   if (method === 'GET' && pathname === '/api/templates') {

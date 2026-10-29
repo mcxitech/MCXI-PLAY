@@ -11,6 +11,8 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': '"production"',
+    // Paid edition: only served by the Worker after the order is activated
+    __MCXI_FULL__: 'true',
   },
   build: {
     outDir: 'dist/export-kit',

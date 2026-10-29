@@ -244,6 +244,22 @@
 
 ---
 
+## REQUISITO PERMANENTE — Protección de la demo y del producto pagado
+**Responsable: Claude Code | Auditoría: Codex** (detalle en `docs/PROJECT.md`, implementación D020)
+
+- [x] Demo con configuración genérica; vista previa con marca de agua y dedicatoria incompleta.
+- [x] Demo y vista previa sin exportación ni descarga.
+- [x] ZIP solo para regalos de pedidos `activated`.
+- [x] Servidor valida `activated` (y enlace activo) antes de entregar motor/config premium.
+- [x] Motor completo no accesible públicamente (`/export-kit/*` → 404); separado del bundle de la demo.
+- [x] Enlace público y token del comprador generados solo al activar.
+- [x] `pending`, `paid` y `cancelled` sin funciones premium.
+- [x] Pruebas 1–6 del requisito en `tests/api.test.mjs` (25/25).
+- [ ] Desplegar a producción y verificar.
+- [ ] Revisión de Codex del requisito.
+
+---
+
 ## FASE 11 — Lanzamiento Comercial
 **Responsables: Kimi gratuito + Gemini gratuito | Claude solo para cambios técnicos**
 

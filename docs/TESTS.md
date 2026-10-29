@@ -155,6 +155,23 @@ Admin checks used a temporary random password (not stored in the repo); the owne
 | Home (prod) | CDP screenshot | Renders; requests only to own domain | 2026-10-29 |
 | Deploy doc commands | `wrangler <cmd> --help` for rollback, deployments list, d1 export, d1 time-travel, secret list | All exist | 2026-10-29 |
 
+## Demo vs paid product (D020)
+
+Note: setting the real `database_id` (Phase 10) gave wrangler a new empty local D1; local migrations were re-applied.
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Bundle separation | grep built files | Public `createGame-*.js`: watermark + teaser present. `export-kit/game.js`: none | 2026-10-29 |
+| Build, worker typecheck, lint | `npm run build`, `npx tsc -p worker/tsconfig.json --noEmit`, `npm run lint` | Pass | 2026-10-29 |
+| Regression suite | `ADMIN_PASSWORD=... npm run test:api` | **25/25 pass** (new: public engine 404 + preview-only bundle; pending/paid/cancelled → 409; activated exports own config via buyer/recipient/admin; cross-order blocked; tampered token/slug/params/method, disabled link and rotated token → 404) | 2026-10-29 |
+| Demo page (390x844) | CDP screenshot `/demo/atrapa-mi-corazon` | Watermark "VISTA PREVIA · MCXI Play" visible | 2026-10-29 |
+| Recipient page | CDP `/regalo/:slug` → "Jugar" | Full engine from `/api/gifts/:slug/engine.js`, custom colors, no watermark; 0 JS errors | 2026-10-29 |
+| Buyer ZIP | CDP "Descargar ZIP" on `/mi-regalo/:token` | 4 files (no `config.js`); `game.js` starts with this gift's config; no watermark | 2026-10-29 |
+| ZIP offline | open via `file://`, network blocked | Game runs; 0 errors, 0 requests | 2026-10-29 |
+| Admin ZIP | CDP login → order detail → "Descargar ZIP" | Downloaded; 0 JS errors | 2026-10-29 |
+
+Not verified visually: preview victory screen (teaser + lock); covered by the bundle string check.
+
 ## Manual Tests Pending
 - Owner: set production admin password (`npm run admin:password`) and log in at `/admin/login`.
 - Real phone (Android/iPhone) on the production URL: full purchase, play a gift to the dedication, download and open the ZIP.

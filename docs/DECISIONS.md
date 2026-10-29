@@ -108,3 +108,16 @@
 - **Buyer token lifecycle:** permanent private link, revoked manually by rotation from the admin (D015). No expiry in the MVP: buyers come back to share or download weeks later, and expiry would need a recovery flow (email) that is out of scope. Revisit if links leak in practice.
 - **Rate limiting trust:** limits key on `CF-Connecting-IP`, which Cloudflare sets at the edge. The Worker must only be exposed through Cloudflare (workers.dev or a Cloudflare-proxied domain), never behind another proxy.
 - **Public GETs** (order lookup, gift, manage) are not rate limited: identifiers are not enumerable (order 45 bits, slug ~68 bits, token ~182 bits) and each limit check costs a D1 write.
+
+## D020 — Demo vs paid product: two engine editions, server-gated full engine
+**Date:** 2026-10-29
+**Decision:**
+- Build-time flag `__MCXI_FULL__` (`src/game/edition.ts`). Public SPA bundle (demo + customizer preview) is built with `false`: watermark "VISTA PREVIA · MCXI Play" and the dedication cut to a teaser with a lock. The minifier removes the full branches, so the public JS has no clean edition.
+- The full edition (`dist/export-kit/game.js`, `true`) is never served directly: `/export-kit/*` goes through the Worker (`run_worker_first`) and returns 404. The Worker reads it through the `ASSETS` binding and serves it with one gift's whitelisted config embedded, only from:
+  - `GET /api/gifts/:publicSlug/engine.js` (recipient play)
+  - `GET /api/gifts/manage/:buyerToken/engine.js` (buyer ZIP)
+  - `GET /api/admin/orders/:id/engine.js` (admin ZIP, session + Origin rules)
+  Each requires the order to be `activated` (SQL join) and, for public/buyer, the gift link active. `Cache-Control: private, no-store`.
+- ZIP no longer has a separate `config.js`; the config is inside `game.js`.
+**Alternatives:** server-side ZIP (CPU limit, D017); bundling the engine into the Worker script (size/startup cost).
+**Residual risks (accepted):** the public preview engine can still be reverse-engineered by a determined person to remove the watermark and run with any text locally; a buyer can edit their own exported copy. Both require deliberate effort and are forbidden by the license; neither yields a link hosted by MCXI.

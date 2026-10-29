@@ -3,17 +3,20 @@ import { escapeHtml } from '@/lib/sanitize'
 import { SITE_NAME } from '@/lib/constants'
 
 // Builds the gift ZIP in the browser (Workers free plan has ~10 ms CPU per request,
-// too little to compress the 1.2 MB engine server-side). See D017.
-// The ZIP holds a fixed whitelist of files and only the config passed in.
+// too little to compress the 1.2 MB engine server-side). See D017/D020.
+// The paid engine comes from an authorized endpoint that checks the order is 'activated'
+// and already embeds that gift's config; the ZIP holds a fixed whitelist of files.
 
-const ENGINE_URL = '/export-kit/game.js'
+export const engineUrl = {
+  buyer: (buyerToken: string) => `/api/gifts/manage/${encodeURIComponent(buyerToken)}/engine.js`,
+  admin: (orderId: string) => `/api/admin/orders/${encodeURIComponent(orderId)}/engine.js`,
+}
 
-export async function downloadGiftZip(config: GameConfig, orderNumber: string): Promise<void> {
-  const res = await fetch(ENGINE_URL)
+export async function downloadGiftZip(engineSrc: string, config: GameConfig, orderNumber: string): Promise<void> {
+  const res = await fetch(engineSrc, { credentials: 'same-origin' })
   const type = res.headers.get('Content-Type') ?? ''
-  // SPA fallback answers unknown paths with index.html (200), so check the type too
   if (!res.ok || !type.includes('javascript')) {
-    throw new Error('No se encontró el motor del juego. Ejecuta el build completo.')
+    throw new Error('Este regalo no se puede descargar (debe estar activado).')
   }
   const engine = new Uint8Array(await res.arrayBuffer())
   const { fileName, data } = await buildGiftZip(config, orderNumber, engine)
@@ -40,7 +43,6 @@ export async function buildGiftZip(
   const data = zipSync({
     [folder]: {
       'index.html': enc.encode(indexHtml(safe)),
-      'config.js': enc.encode(configJs(safe)),
       'game.js': [engine, { level: 6 }],
       'LEEME.txt': enc.encode(readme(safe, orderNumber)),
       'LICENCIA.txt': enc.encode(license(orderNumber)),
@@ -61,12 +63,6 @@ function pickConfig(c: GameConfig): GameConfig {
   }
 }
 
-function configJs(c: GameConfig): string {
-  // Escape "<" so the JSON can never close a script tag
-  const json = JSON.stringify(c, null, 2).replace(/</g, '\\u003c')
-  return `// Personalización de este regalo. Generado por ${SITE_NAME}.\nwindow.MCXI_GIFT_CONFIG = ${json};\n`
-}
-
 function indexHtml(c: GameConfig): string {
   return `<!doctype html>
 <html lang="es">
@@ -82,7 +78,6 @@ function indexHtml(c: GameConfig): string {
 </head>
 <body>
   <div id="game"></div>
-  <script src="config.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
@@ -117,8 +112,7 @@ Comparte la dirección que te den. No se necesita base de datos ni servidor.
 
 ARCHIVOS
   index.html   Página del juego
-  game.js      Motor del juego
-  config.js    Nombres, dedicatoria y colores de este regalo
+  game.js      Juego con la personalización de este regalo
   LICENCIA.txt Condiciones de uso
 
 Hecho con ${SITE_NAME}.

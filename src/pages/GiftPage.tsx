@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import PhaserGame from '@/components/PhaserGame'
 import { api } from '@/lib/api'
 import type { GameConfig } from '@/game/config'
 import { SITE_NAME } from '@/lib/constants'
@@ -11,11 +10,24 @@ export default function GiftPage() {
   const [config, setConfig] = useState<GameConfig | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [playing, setPlaying] = useState(false)
+  const engineLoaded = useRef(false)
 
   useEffect(() => {
     if (!publicSlug) return
     api.gift(publicSlug).then((g) => setConfig(g.config)).catch(() => setNotFound(true))
   }, [publicSlug])
+
+  // The full game is not in the public bundle: the Worker serves it with this gift's
+  // config embedded, only while the order is activated and the link is active (D020).
+  // It renders into #game.
+  useEffect(() => {
+    if (!playing || !publicSlug || engineLoaded.current) return
+    engineLoaded.current = true
+    const script = document.createElement('script')
+    script.src = `/api/gifts/${encodeURIComponent(publicSlug)}/engine.js`
+    script.onerror = () => setNotFound(true)
+    document.body.appendChild(script)
+  }, [playing, publicSlug])
 
   if (notFound) {
     return (
@@ -55,7 +67,7 @@ export default function GiftPage() {
       ) : (
         <div className="w-full flex-1 flex items-center justify-center">
           <div className="w-full max-w-[400px] h-[calc(100vh-5rem)] max-h-[600px] aspect-[2/3]">
-            <PhaserGame config={config} className="w-full h-full" />
+            <div id="game" className="w-full h-full rounded-xl overflow-hidden" />
           </div>
         </div>
       )}

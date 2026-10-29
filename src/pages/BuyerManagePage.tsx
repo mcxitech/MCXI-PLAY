@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, type GiftManage } from '@/lib/api'
 import CopyButton from '@/components/CopyButton'
-import { downloadGiftZip } from '@/lib/exportGift'
+import { downloadGiftZip, engineUrl } from '@/lib/exportGift'
 
 // Buyer page: reachable only with the private token. Shows the shareable recipient link.
 export default function BuyerManagePage() {
@@ -95,7 +95,7 @@ export default function BuyerManagePage() {
               setExporting(true)
               setExportError('')
               try {
-                await downloadGiftZip(gift.config, gift.orderNumber)
+                await downloadGiftZip(engineUrl.buyer(buyerToken!), gift.config, gift.orderNumber)
               } catch (err) {
                 setExportError(err instanceof Error ? err.message : 'No se pudo generar el ZIP')
               } finally {

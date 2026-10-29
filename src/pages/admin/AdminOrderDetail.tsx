@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { adminApi, type OrderDetail } from '@/lib/admin-api'
 import CopyButton from '@/components/CopyButton'
-import { downloadGiftZip } from '@/lib/exportGift'
+import { downloadGiftZip, engineUrl } from '@/lib/exportGift'
 
 const SMALL_BTN = 'bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs shrink-0'
 
@@ -94,7 +94,7 @@ export default function AdminOrderDetail() {
                     if (!order.gift) return
                     setActionLoading(true)
                     try {
-                      await downloadGiftZip(order.gift.config, order.order_number)
+                      await downloadGiftZip(engineUrl.admin(order.id), order.gift.config, order.order_number)
                     } catch (err) {
                       setError(err instanceof Error ? err.message : 'Error al exportar')
                     } finally {

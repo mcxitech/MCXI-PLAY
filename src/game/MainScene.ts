@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import type { GameConfig } from './config'
 import { DEFAULT_CONFIG, hexToNumber } from './config'
+import { addPreviewWatermark } from './edition'
 
 const TOTAL_HEARTS = 10
 const OBSTACLE_TYPES = 2
@@ -44,6 +45,7 @@ export default class MainScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, 0x1e1b4b).setOrigin(0.5)
 
     this.addStars(width, height)
+    addPreviewWatermark(this)
 
     this.player = this.createPlayer(width / 2, height - 60, primary)
     this.spawnHearts(width, height, primary)

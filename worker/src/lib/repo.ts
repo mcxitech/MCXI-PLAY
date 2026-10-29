@@ -180,12 +180,25 @@ export class Repo {
     return (row?.count ?? 0) > limit
   }
 
+  // Public/buyer lookups only ever return gifts whose order is 'activated' (paid + confirmed)
   async getGiftByPublicSlug(slug: string): Promise<Gift | null> {
-    return this.db.prepare('SELECT * FROM gifts WHERE public_slug = ? AND active = 1').bind(slug).first<Gift>()
+    return this.db
+      .prepare(
+        `SELECT g.* FROM gifts g JOIN orders o ON o.id = g.order_id
+         WHERE g.public_slug = ? AND g.active = 1 AND o.status = 'activated'`,
+      )
+      .bind(slug)
+      .first<Gift>()
   }
 
   async getGiftByBuyerToken(token: string): Promise<Gift | null> {
-    return this.db.prepare('SELECT * FROM gifts WHERE buyer_token = ?').bind(token).first<Gift>()
+    return this.db
+      .prepare(
+        `SELECT g.* FROM gifts g JOIN orders o ON o.id = g.order_id
+         WHERE g.buyer_token = ? AND o.status = 'activated'`,
+      )
+      .bind(token)
+      .first<Gift>()
   }
 
   async getGiftByOrderId(orderId: string): Promise<Gift | null> {

@@ -27,6 +27,7 @@ Commercial platform for personalized gift videogames. See `docs/PROJECT.md` for 
 - Start from `docs/SECURITY_REVIEW.md` (previous audit + fix notes). Verify fixes, do not re-report fixed items unless the fix is wrong.
 - Phase 9 scope = the "FASE 9" checklist in `docs/TASKS.md`. New since last audit: ZIP export (`src/lib/exportGift.ts`, `src/export/main.ts`, `vite.export.config.ts`), revocation endpoints, rate limiting (`worker/migrations/0002_rate_limits.sql`).
 - Report findings in `docs/SECURITY_REVIEW.md` (new dated section), with severity, file/line, evidence, and minimal fix.
+- Always check the permanent "Demo vs Paid Product" requirement in docs/PROJECT.md (D020): no premium engine/config for non-activated orders, no public reusable full bundle.
 - Do NOT fix the code yourself. Claude Code will fix based on your findings.
 - Do NOT rewrite the entire application.
 

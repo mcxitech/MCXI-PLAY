@@ -1,6 +1,7 @@
 import { Repo } from '../lib/repo'
 import { json, jsonError, readJson } from '../lib/json'
 import { verifyPassword, createSessionCookie, clearSessionCookie, isAuthenticated } from '../lib/auth'
+import { engineResponse } from '../lib/engine'
 
 export async function handleAdminRoutes(
   request: Request,
@@ -8,6 +9,7 @@ export async function handleAdminRoutes(
   repo: Repo,
   adminPasswordHash: string | undefined,
   sessionSecret: string | undefined,
+  assets: Fetcher,
 ): Promise<Response | null> {
   const { pathname } = url
   const method = request.method
@@ -94,6 +96,17 @@ export async function handleAdminRoutes(
       gift: gift ? { publicSlug: gift.public_slug, buyerToken: gift.buyer_token, playCount: gift.play_count, active: Boolean(gift.active), config: JSON.parse(gift.config) } : null,
       templateName: template?.name,
     })
+  }
+
+  // GET /api/admin/orders/:id/engine.js — admin ZIP export, only for activated orders
+  const engineMatch = pathname.match(/^\/api\/admin\/orders\/([A-Z0-9]+)\/engine\.js$/i)
+  if (method === 'GET' && engineMatch) {
+    const order = await repo.getOrderById(engineMatch[1]!)
+    if (!order) return jsonError('Pedido no encontrado', 404)
+    if (order.status !== 'activated') return jsonError('Solo se exportan pedidos activados', 409)
+    const gift = await repo.getGiftByOrderId(order.id)
+    if (!gift) return jsonError('El pedido no tiene regalo', 404)
+    return engineResponse(assets, url, gift.config)
   }
 
   // PATCH /api/admin/orders/:id/pay

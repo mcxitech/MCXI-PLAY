@@ -204,9 +204,12 @@ audit_log
 | PATCH | `/api/admin/orders/:id/gift-access` | Admin | Enable/disable recipient link |
 | GET | `/api/admin/templates` | Admin | List all templates |
 | PATCH | `/api/admin/templates/:id` | Admin | Update template |
-| GET | `/export-kit/game.js` | Static | Standalone engine used inside ZIPs (no gift data) |
+| GET | `/api/gifts/:publicSlug/engine.js` | Public (activated + active) | Full game with this gift config (D020) |
+| GET | `/api/gifts/manage/:buyerToken/engine.js` | Buyer (activated + active) | Full game for the ZIP |
+| GET | `/api/admin/orders/:id/engine.js` | Admin (activated) | Full game for the ZIP |
+| GET | `/export-kit/*` | — | Always 404 (paid engine is only served through the endpoints above) |
 
-ZIPs are built in the browser (D017): the buyer page gets the config from `/api/gifts/manage/:buyerToken`, the admin page from `/api/admin/orders/:id` (`gift.config`). There is no server-side export endpoint.
+ZIPs are built in the browser (D017) from the engine endpoints above, which embed the gift config (D020).
 | GET | `/api/admin/stats` | Admin | Dashboard stats |
 
 ---
@@ -240,13 +243,12 @@ The export creates a self-contained folder:
 ```
 regalo-MCXI-XXXX/
 ├── index.html          # Standalone page with inline CSS
-├── game.js             # Phaser engine (IIFE, ~1.2 MB; graphics and sounds are generated in code)
-├── config.js           # window.MCXI_GIFT_CONFIG = {...} for this gift only
+├── game.js             # window.MCXI_GIFT_CONFIG = {...this gift} + full-edition engine (IIFE, ~1.2 MB)
 ├── LEEME.txt           # Instructions in Spanish (open, local server, free hosting)
 └── LICENCIA.txt        # Personal use license
 ```
 
-- `index.html` loads `config.js` then `game.js` as classic scripts (not ES modules), so double-click (`file://`) works. Verified offline in Chrome; other browsers not verified, LEEME.txt gives a local-server fallback.
+- `index.html` loads `game.js` as a classic script (not ES modules), so double-click (`file://`) works. Verified offline in Chrome; other browsers not verified, LEEME.txt gives a local-server fallback.
 - No assets folder: the game draws everything with Phaser Graphics and synthesizes sound.
 - Does NOT include: React, admin code, API calls, other buyers' data, source TypeScript (verified by scanning `game.js`).
 - Build: `vite build -c vite.export.config.ts` → `dist/export-kit/game.js` (entry `src/export/main.ts`). The ZIP is assembled client-side in `src/lib/exportGift.ts` with `fflate`.
@@ -295,3 +297,21 @@ Recipient ◄── Unique Link ◄───────────────
 - No multiplayer, no runtime AI, no subscriptions.
 - Zero-cost infrastructure (Cloudflare free tier).
 - Prices in MXN.
+
+---
+
+## Permanent Requirement: Demo vs Paid Product (owner, 2026-10-29)
+
+The demo/preview only shows the product; it must never let anyone build, play in full, or export a complete gift without paying. Applies to every current and future template.
+
+- Demo uses a generic config; the customizer preview may show the user's own text but always with visible limits (watermark, incomplete final screen).
+- Demo and preview never allow export/download/ZIP.
+- ZIP export and the full game exist only for gifts whose order is `activated` (payment confirmed). `pending`, `paid` and `cancelled` orders get nothing premium.
+- The server validates `activated` (and that the link is active) before returning any premium config or engine. Browser parameters, URLs or request tampering must not bypass it.
+- No public bundle or endpoint that makes the full game easy to reuse outside the purchase flow. Premium code/resources are separated from the demo bundle when reasonably possible.
+- Assume all JavaScript sent to the browser can be inspected; hiding buttons or variables is never the only protection.
+- Recipient link and buyer token are generated only at activation.
+- Regression tests must cover: demo cannot export; pending cannot get ZIP; paid-not-activated cannot get ZIP; activated exports only its own config; a buyer cannot export another order; request tampering does not bypass restrictions.
+- No cosmetic refactors or rewrites when applying this; keep changes focused on authorization and separation.
+
+Implementation: D020.

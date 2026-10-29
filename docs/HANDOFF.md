@@ -38,8 +38,12 @@ Since the real `database_id` is in `wrangler.toml`, local D1 is a new database: 
 
 ## Phase 11 (Kimi/Gemini) — technical support done by Claude
 - Catalog name/description/price/active now come from D1 (`src/lib/useTemplates.ts`), so admin edits show on the site and match what orders charge.
-- 7 real screenshots in `docs/marketing/`; brief for copywriters in `docs/LAUNCH_BRIEF.md`.
-- Still for the owner/other AIs: victory-screen screenshot and short video (from a phone), all copywriting items, privacy/terms review, real purchase test.
+- 11 real screenshots in `docs/marketing/` (new art, incl. envelope and final letter); brief in `docs/LAUNCH_BRIEF.md`; official copies in `docs/MARKETING.md`.
+- Still for the owner/other AIs: short video (from a phone), copywriting items, privacy/terms review, real purchase test.
+
+## Visual overhaul (D021) — done locally, not deployed
+- `src/game/art.ts` (procedural textures, themes, background), `src/game/sounds.ts` (synth sounds), `MainScene.ts` (intro, HUD slots, effects), `VictoryScene.ts` (envelope + letter), `BootScene.ts` (generates art).
+- Preview/paid separation unchanged (D020). Check performance on a low-end phone.
 
 ## Next Task
-Owner deploys (includes D020 + price fix) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.
+Owner deploys (includes D020 + price fix + D021 visuals) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.

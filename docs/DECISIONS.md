@@ -121,3 +121,9 @@
 - ZIP no longer has a separate `config.js`; the config is inside `game.js`.
 **Alternatives:** server-side ZIP (CPU limit, D017); bundling the engine into the Worker script (size/startup cost).
 **Residual risks (accepted):** the public preview engine can still be reverse-engineered by a determined person to remove the watermark and run with any text locally; a buyer can edit their own exported copy. Both require deliberate effort and are forbidden by the license; neither yields a link hosted by MCXI.
+
+## D021 — Visual overhaul with procedural art (no image files)
+**Date:** 2026-10-29
+**Decision:** All game art is drawn at boot with Canvas 2D (`src/game/art.ts`): glossy hearts, character with blinking eyes, grumpy obstacles, themed gradient backgrounds and drifting decorations (hearts / balloons / stars), particles (sparks, trail, confetti). Sounds are synthesized (`src/game/sounds.ts`). New flow: personal intro ("Un juego para X, de parte de Y"), HUD with 10 heart slots, hit feedback, win flash, and a victory sequence (envelope opens, letter with typewriter dedication and signature).
+**Alternatives:** PixelLab/AI sprites (cost and commercial-license checks pending; would also need embedding for `file://`), image files (break single-file offline ZIP).
+**Reason:** Higher perceived value at $0, no licenses, ZIP still works offline, demo/paid separation (D020) unchanged: preview edition keeps watermark and teaser dedication.

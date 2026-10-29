@@ -181,7 +181,22 @@ Not verified visually: preview victory screen (teaser + lock); covered by the bu
 | Build + lint + regression | `npm run build`, `npm run lint`, `npm run test:api` | Pass, 25/25 | 2026-10-29 |
 | Marketing screenshots | CDP capture (390x844 @2x, 1280x800) with sample data | 7 PNG in `docs/marketing/` | 2026-10-29 |
 
+## Visual overhaul (D021)
+
+Scene-level checks use a scratch harness (outside the repo) that builds the same game code with `window.__game` exposed, so CDP can drive collect/hit/win.
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Build, lint, edition separation | `npm run build`, `npm run lint`, grep bundles | Pass; preview strings only in public chunk | 2026-10-29 |
+| Full edition sequence (romantic) | harness + CDP: intro → 3 hearts → hit → 7 hearts → victory frames | Intro with names, sparks/slots/cheer text, "¡Ay!" + shake, flash, envelope opens, typewriter letter + signature + replay; 0 JS errors | 2026-10-29 |
+| Preview edition victory | harness built with `__MCXI_FULL__=false` | Teaser "Feliz aniversa… 🔒", "se desbloquea al comprar", bottom watermark note | 2026-10-29 |
+| Birthday theme | harness | Blue palette, balloons, themed confetti, letter in primary color | 2026-10-29 |
+| Regression suite | `npm run test:api` | 25/25 | 2026-10-29 |
+| Real app gift + ZIP offline | CDP `/mi-regalo` → ZIP (330 KB) → `file://` with network blocked | New art renders (friendship theme), 0 errors, 0 requests | 2026-10-29 |
+| Marketing screenshots | CDP capture + harness frames | 11 PNG in `docs/marketing/` | 2026-10-29 |
+
 ## Manual Tests Pending
+- Performance of the new effects (particles, confetti) on a low-end Android phone.
 - Owner: set production admin password (`npm run admin:password`) and log in at `/admin/login`.
 - Real phone (Android/iPhone) on the production URL: full purchase, play a gift to the dedication, download and open the ZIP.
 - Antigravity visual/UX review on mobile.

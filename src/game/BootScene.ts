@@ -1,4 +1,6 @@
 import Phaser from 'phaser'
+import { generateArt } from './art'
+import { DEFAULT_CONFIG, type GameConfig } from './config'
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
@@ -7,6 +9,8 @@ export default class BootScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale
+    const config = this.registry.get('gameConfig') as Partial<GameConfig> | undefined
+    generateArt(this, { ...DEFAULT_CONFIG, ...config })
 
     this.add
       .rectangle(width / 2, height / 2, width, height, 0x1e1b4b)

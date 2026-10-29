@@ -266,7 +266,7 @@
 - [ ] Preparar nombre comercial de la primera plantilla.
 - [ ] Preparar descripción atractiva.
 - [x] Definir precio inicial configurable. (Claude: la web ahora muestra nombre, descripción, precio y activación desde D1; se edita en el panel. Precio actual $149, confirmar con el dueño.)
-- [ ] Capturar imágenes reales del videojuego. (Claude: 7 capturas en `docs/marketing/`. Falta la pantalla final con dedicatoria, desde un celular.)
+- [x] Capturar imágenes reales del videojuego. (11 capturas en `docs/marketing/` con el arte nuevo, incluye sobre y carta final.)
 - [ ] Grabar video corto de demostración.
 - [ ] Preparar anuncio de Facebook.
 - [ ] Preparar publicación de Instagram.

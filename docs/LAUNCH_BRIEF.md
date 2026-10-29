@@ -39,8 +39,9 @@ Usa solo estos datos. No inventes funciones, precios ni plazos que no estén aqu
 Capturas reales en `docs/marketing/` (datos de ejemplo, sin datos de clientes):
 - `01-portada-escritorio.png`, `02-portada-movil.png`, `03-detalle-movil.png`
 - `04-personalizar-movil.png`, `05-vista-previa-movil.png` (con marca de agua)
-- `06-regalo-intro-movil.png` ("Diego te envió un regalo"), `07-juego-movil.png`
-Pendiente: captura de la pantalla final con dedicatoria y video corto (grabar desde un celular).
+- `06-regalo-intro-movil.png` ("Diego te envió un regalo"), `07-juego-movil.png` (inicio personalizado del juego)
+- `08-juego-en-accion.png`, `09-sobre.png` (sobre al ganar), `10-carta-final.png` (carta con dedicatoria), `11-carta-cumpleanos.png` (temática cumpleaños)
+Pendiente: video corto (grabar desde un celular).
 
 ## Entregables esperados (Fase 11)
 Nombre comercial, descripción, anuncio de Facebook, publicación de Instagram, mensaje de WhatsApp, preguntas frecuentes, revisión de condiciones y aviso de privacidad (`/condiciones`, `/privacidad`). Entregar como texto; Claude Code solo aplica cambios técnicos si hacen falta.

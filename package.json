@@ -11,7 +11,8 @@
     "worker:dev": "wrangler dev",
     "worker:deploy": "wrangler deploy",
     "typecheck": "tsc -b --noEmit",
-    "test:api": "node --test tests/api.test.mjs"
+    "test:api": "node --test tests/api.test.mjs",
+    "admin:password": "node scripts/set-admin-password.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

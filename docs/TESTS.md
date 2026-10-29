@@ -136,6 +136,27 @@ Browser tests use headless Chrome driven over CDP (scripts kept outside the repo
 | Regression suite | `ADMIN_PASSWORD=... npm run test:api` | **18/18 pass** (added: CSRF Origin check, concurrent pay vs cancel) | 2026-10-29 |
 | Admin UI with Origin check | CDP: login form + "Confirmar pago" click | Login OK; order → `paid`, audit `payment.confirmed` | 2026-10-29 |
 
+## Phase 10 (production: https://mcxi-play.mcxi-tech.workers.dev)
+
+Admin checks used a temporary random password (not stored in the repo); the owner replaces it with `npm run admin:password`. The test order was deleted afterwards (DB back to 0 orders/gifts/buyers/audit, 1 template).
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| D1 + migrations | `wrangler d1 create`, `d1 migrations apply --remote` | 0001, 0002 applied | 2026-10-29 |
+| Deploy | `npm run build`, `npx wrangler deploy` | 8 assets, binding `DB` | 2026-10-29 |
+| URL + SPA routes | `curl` `/`, `/juego/...`, `/regalo/x`, `/admin`, `/export-kit/game.js` | 200 after ~1 min of workers.dev propagation (first minute: 404 / error 1042) | 2026-10-29 |
+| Catalog from D1 | `GET /api/templates` | Template returned | 2026-10-29 |
+| Admin auth | no cookie / fake cookie / foreign Origin / login | 401 / 401 / 403 / 200; cookie `HttpOnly; SameSite=Strict; Secure` | 2026-10-29 |
+| Order → pay → activate | API with admin session | pending → (activate unpaid 400) → paid → activated | 2026-10-29 |
+| Recipient / buyer links | `GET /api/gifts/:slug`, `/api/gifts/manage/:token`, slug as token | Only `config,playCount`; buyer OK; 404 | 2026-10-29 |
+| Public lookup privacy | `GET /api/orders/:num` | No slug/token | 2026-10-29 |
+| Browser 390x844 (prod) | CDP: `/mi-regalo/:token` → "Descargar ZIP"; `/regalo/:slug` → "Jugar"; unknown gift | Page OK, ZIP 326 KB, canvas, "no disponible"; 0 JS errors | 2026-10-29 |
+| ZIP from prod offline | unzip, open `index.html` via `file://`, network blocked | Game running with custom theme; 0 errors, 0 requests | 2026-10-29 |
+| Home (prod) | CDP screenshot | Renders; requests only to own domain | 2026-10-29 |
+| Deploy doc commands | `wrangler <cmd> --help` for rollback, deployments list, d1 export, d1 time-travel, secret list | All exist | 2026-10-29 |
+
 ## Manual Tests Pending
-- Play a gift to the end (dedication screen) on a real phone, both online and from an exported ZIP.
+- Owner: set production admin password (`npm run admin:password`) and log in at `/admin/login`.
+- Real phone (Android/iPhone) on the production URL: full purchase, play a gift to the dedication, download and open the ZIP.
+- Antigravity visual/UX review on mobile.
 - Exported ZIP served over http (`python -m http.server` / `npx serve`) and in Safari/Firefox: not verified.

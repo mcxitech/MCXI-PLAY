@@ -27,3 +27,6 @@ npm run typecheck  # Verificación de tipos
 - [Decisiones](docs/DECISIONS.md) — Decisiones técnicas
 - [Handoff](docs/HANDOFF.md) — Estado actual
 - [Tests](docs/TESTS.md) — Registro de pruebas
+- [Despliegue](docs/DEPLOY.md) — Publicar, secretos y recuperación
+
+Producción: https://mcxi-play.mcxi-tech.workers.dev

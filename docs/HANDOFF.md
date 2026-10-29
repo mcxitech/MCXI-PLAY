@@ -1,32 +1,26 @@
 # MCXI Play — Handoff State
 
 ## Current Phase
-**Phase 9 — Seguridad y Calidad (COMPLETE, pending owner review).** Next: Phase 10 — Publicación en Cloudflare (needs owner approval and Cloudflare account access).
+**Phase 10 — Publicación en Cloudflare (technical work complete; 3 owner items pending).**
+Production: https://mcxi-play.mcxi-tech.workers.dev
 
 ## Last Completed Task
-Processed the Codex Phase 9 audit (`docs/SECURITY_REVIEW.md`): no critical/high findings. Fixed SEC-003 (Origin check on admin mutations), extended regression tests (18/18), documented policies for SEC-002/SEC-004 (D019), verified no secrets in Git history, final build.
+Created D1 `mcxi-play-db` (WNAM), applied migrations 0001–0002 remotely, deployed Worker `mcxi-play`, set `SESSION_SECRET`, verified the full flow in production (API + headless Chrome mobile), deleted the test data, wrote `docs/DEPLOY.md`.
 
 ## Important Changes
-- `worker/src/routes/admin.ts`: non-GET admin requests require `Origin` == Worker origin (403 otherwise).
-- `tests/api.test.mjs`: sends `Origin`; new tests for CSRF and concurrent pay vs cancel.
-- `docs/SECURITY_REVIEW.md`: Codex report + "Respuesta de Claude Code" table. Previous audit is in Git history (`87c0e75`).
-- `docs/DECISIONS.md`: D019.
-
-## Local Setup (not in Git)
-- `.dev.vars`: `ADMIN_PASSWORD_HASH=<sha256 hex>` and `SESSION_SECRET=<64 hex chars>`.
-- `npx wrangler d1 migrations apply mcxi-play-db --local` (migrations 0001, 0002)
-- `npm run build` then `npx wrangler dev` → http://localhost:8787
-- Tests: `ADMIN_PASSWORD=<pw> npm run test:api`
+- `wrangler.toml`: real `database_id`.
+- `scripts/set-admin-password.mjs` + `npm run admin:password`: hidden prompt, uploads only the SHA-256 hash as `ADMIN_PASSWORD_HASH`.
+- `docs/DEPLOY.md`: deploy, secrets, rollback, D1 export, Time Travel restore, admin lockout.
+- `README.md`: link to DEPLOY and production URL.
 
 ## Pending (owner)
-- `PAYMENT_INFO` (`src/lib/constants.ts`) still has placeholder data.
-- Manual: play a gift to the dedication on a real phone (online and from ZIP); ZIP in Safari/Firefox and over http.
+1. **Set the real admin password:** `npm run admin:password` (production currently has a temporary random password used for testing; nobody else knows it).
+2. Test on a real phone at the production URL.
+3. Antigravity visual review (mobile).
+4. Real payment data in `PAYMENT_INFO` (`src/lib/constants.ts`) before announcing the site; redeploy afterwards (`npm run build && npx wrangler deploy`).
 
-## For Phase 10 (do not start without approval)
-- Create D1 database, put its `database_id` in `wrangler.toml`.
-- Secrets: `npx wrangler secret put ADMIN_PASSWORD_HASH`, `npx wrangler secret put SESSION_SECRET`.
-- Remote migrations: `npx wrangler d1 migrations apply mcxi-play-db --remote`.
-- Deploy only through Cloudflare (D019: rate limiting trusts `CF-Connecting-IP`).
+## Pending Errors
+None known. Note: a new workers.dev subdomain took ~1 minute to propagate (404 / error 1042 meanwhile).
 
 ## Next Task
-Owner review of Phase 9. Then Phase 10, first task: "Configurar Wrangler".
+Owner completes the 4 items above and reviews Phase 10. Phase 11 (commercial launch) belongs to Kimi/Gemini; Claude only for technical changes.

@@ -219,28 +219,28 @@
 ## FASE 10 — Publicación en Cloudflare
 **Responsable: Claude Code | Pruebas visuales: Antigravity**
 
-- [ ] Configurar Wrangler.
-- [ ] Crear entorno de producción.
-- [ ] Configurar bindings D1.
-- [ ] Configurar secretos de producción.
-- [ ] Ejecutar migraciones.
-- [ ] Compilar frontend y backend.
-- [ ] Desplegar en Cloudflare.
-- [ ] Verificar URL gratuita real.
-- [ ] Confirmar funcionamiento del catálogo.
-- [ ] Confirmar funcionamiento del juego.
-- [ ] Confirmar personalización.
-- [ ] Confirmar creación de pedido.
-- [ ] Confirmar acceso administrativo.
-- [ ] Confirmar activación de pago manual.
-- [ ] Confirmar acceso del comprador.
-- [ ] Confirmar acceso del destinatario.
-- [ ] Confirmar exportación ZIP.
-- [ ] Comprobar privacidad de datos.
-- [ ] Probar en celular.
-- [ ] Solicitar revisión visual a Antigravity.
-- [ ] Corregir problemas críticos.
-- [ ] Documentar despliegue y recuperación.
+- [x] Configurar Wrangler.
+- [x] Crear entorno de producción. (Worker `mcxi-play`, https://mcxi-play.mcxi-tech.workers.dev)
+- [x] Configurar bindings D1. (`mcxi-play-db`, id en `wrangler.toml`)
+- [ ] Configurar secretos de producción. (`SESSION_SECRET` listo. `ADMIN_PASSWORD_HASH` tiene una contraseña temporal de pruebas: falta que el dueño ejecute `npm run admin:password`.)
+- [x] Ejecutar migraciones. (0001 y 0002 remotas)
+- [x] Compilar frontend y backend.
+- [x] Desplegar en Cloudflare.
+- [x] Verificar URL gratuita real.
+- [x] Confirmar funcionamiento del catálogo.
+- [x] Confirmar funcionamiento del juego. (Página del destinatario y ZIP sin conexión, Chrome headless 390x844)
+- [x] Confirmar personalización. (Tema y colores del pedido de prueba aplicados en el juego)
+- [x] Confirmar creación de pedido.
+- [x] Confirmar acceso administrativo. (Login, cookie `Secure`/`HttpOnly`/`SameSite=Strict`, cookie falsa y Origin ajeno rechazados)
+- [x] Confirmar activación de pago manual.
+- [x] Confirmar acceso del comprador.
+- [x] Confirmar acceso del destinatario.
+- [x] Confirmar exportación ZIP. (Descargado desde producción y abierto por `file://` sin red)
+- [x] Comprobar privacidad de datos. (Consulta pública sin secretos; slug no sirve como token; la portada solo carga recursos propios)
+- [ ] Probar en celular. (Pendiente: celular real del dueño)
+- [ ] Solicitar revisión visual a Antigravity. (Pendiente: dueño)
+- [x] Corregir problemas críticos. (No se detectaron)
+- [x] Documentar despliegue y recuperación. (`docs/DEPLOY.md`)
 
 ---
 

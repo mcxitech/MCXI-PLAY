@@ -11,5 +11,5 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "mcxi-play-db"
-database_id = "" # Set after running: npx wrangler d1 create mcxi-play-db
+database_id = "72d7b25c-7907-49fd-b4c4-86c87768115a"
 migrations_dir = "worker/migrations"

@@ -271,7 +271,7 @@
 - [ ] Preparar anuncio de Facebook.
 - [ ] Preparar publicación de Instagram.
 - [ ] Preparar mensaje para WhatsApp.
-- [ ] Preparar respuestas a preguntas frecuentes.
+- [x] Preparar respuestas a preguntas frecuentes. (FAQ del sitio por Kimi, ajustada a lo que el producto hace hoy; respuestas de WhatsApp en `docs/MARKETING.md`)
 - [ ] Revisar precios y condiciones comerciales.
 - [ ] Revisar aviso de privacidad.
 - [ ] Probar una compra completa.

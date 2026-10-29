@@ -45,5 +45,9 @@ Since the real `database_id` is in `wrangler.toml`, local D1 is a new database: 
 - `src/game/art.ts` (procedural textures, themes, background), `src/game/sounds.ts` (synth sounds), `MainScene.ts` (intro, HUD slots, effects), `VictoryScene.ts` (envelope + letter), `BootScene.ts` (generates art).
 - Preview/paid separation unchanged (D020). Check performance on a low-end phone.
 
+## Storefront redesign (D022) — done locally, not deployed
+- Kimi's site integrated with self-hosted fonts and corrected FAQ claims; `useTemplates.ts` kept (price always from D1).
+- Marketing screenshots 01–07 recaptured with the new site.
+
 ## Next Task
-Owner deploys (includes D020 + price fix + D021 visuals) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.
+Owner deploys (includes D020 + price fix + D021 visuals + D022 storefront) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.

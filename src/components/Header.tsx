@@ -8,8 +8,10 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-purple-900/30">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-white font-bold text-xl">
-          <span className="text-purple-400">▶</span>
+        <Link to="/" className="flex items-center gap-2 text-white font-bold text-xl font-display tracking-tight">
+          <svg className="w-5 h-5 text-purple-500" viewBox="0 0 12 9" fill="currentColor" aria-hidden="true">
+            <path d="M2 0h2v1h-2zM8 0h2v1h-2zM1 1h4v1h-4zM7 1h4v1h-4zM0 2h12v1H0zM0 3h12v1H0zM1 4h10v1h-10zM2 5h8v1h-8zM3 6h6v1h-6zM4 7h4v1h-4zM5 8h2v1h-2z" />
+          </svg>
           {SITE_NAME}
         </Link>
 
@@ -22,6 +24,15 @@ export default function Header() {
           </a>
           <a href="/#como-funciona" className="hover:text-white transition-colors">
             Cómo funciona
+          </a>
+          <a href="/#preguntas" className="hover:text-white transition-colors">
+            Preguntas
+          </a>
+          <a
+            href="/#catalogo"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2 rounded-full transition-colors"
+          >
+            Crear mi regalo
           </a>
         </nav>
 
@@ -51,6 +62,16 @@ export default function Header() {
           </a>
           <a href="/#como-funciona" className="hover:text-white" onClick={() => setMenuOpen(false)}>
             Cómo funciona
+          </a>
+          <a href="/#preguntas" className="hover:text-white" onClick={() => setMenuOpen(false)}>
+            Preguntas
+          </a>
+          <a
+            href="/#catalogo"
+            onClick={() => setMenuOpen(false)}
+            className="mt-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2.5 rounded-full text-center transition-colors"
+          >
+            Crear mi regalo
           </a>
         </nav>
       )}

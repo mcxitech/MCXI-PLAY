@@ -195,6 +195,17 @@ Scene-level checks use a scratch harness (outside the repo) that builds the same
 | Real app gift + ZIP offline | CDP `/mi-regalo` → ZIP (330 KB) → `file://` with network blocked | New art renders (friendship theme), 0 errors, 0 requests | 2026-10-29 |
 | Marketing screenshots | CDP capture + harness frames | 11 PNG in `docs/marketing/` | 2026-10-29 |
 
+## Storefront integration (D022)
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Kimi ZIP review | diff against base commit 055e553 | 13 frontend files changed; nothing else | 2026-10-29 |
+| Build + lint | `npm run build`, `npm run lint` | Pass | 2026-10-29 |
+| Regression suite | `npm run test:api` | 25/25 | 2026-10-29 |
+| Third-party requests | CDP network log on `/` | None (fonts self-hosted; Kimi version requested fonts.googleapis.com / fonts.gstatic.com) | 2026-10-29 |
+| Fonts loaded | `document.fonts` | Baloo 2 Variable, Plus Jakarta Sans Variable | 2026-10-29 |
+| Visual (desktop + 390x844) | CDP full-page screenshots of home, customizer, admin login | Renders; price from D1 ($149) | 2026-10-29 |
+
 ## Manual Tests Pending
 - Performance of the new effects (particles, confetti) on a low-end Android phone.
 - Owner: set production admin password (`npm run admin:password`) and log in at `/admin/login`.

@@ -127,3 +127,9 @@
 **Decision:** All game art is drawn at boot with Canvas 2D (`src/game/art.ts`): glossy hearts, character with blinking eyes, grumpy obstacles, themed gradient backgrounds and drifting decorations (hearts / balloons / stars), particles (sparks, trail, confetti). Sounds are synthesized (`src/game/sounds.ts`). New flow: personal intro ("Un juego para X, de parte de Y"), HUD with 10 heart slots, hit feedback, win flash, and a victory sequence (envelope opens, letter with typewriter dedication and signature).
 **Alternatives:** PixelLab/AI sprites (cost and commercial-license checks pending; would also need embedding for `file://`), image files (break single-file offline ZIP).
 **Reason:** Higher perceived value at $0, no licenses, ZIP still works offline, demo/paid separation (D020) unchanged: preview edition keeps watermark and teaser dedication.
+
+## D022 — Storefront redesign by Kimi, integrated with fixes
+**Date:** 2026-10-29
+**Decision:** Adopt Kimi's site redesign (hero "Un regalo que hay que ganarse", occasions marquee, "Todo lo que incluye", FAQ, final CTA, pink/wine palette via Tailwind color tokens in `src/index.css`, new Header/Footer/GameCard/GameDetailPage, components Faq/FloatingHearts/OccasionsMarquee/PixelHeart/Reveal). Kimi only changed frontend files; server, security, game and tests untouched.
+**Not adopted:** Kimi's `useTemplates.ts` fallback (showed the hardcoded $149 when the API fails, re-introducing the price mismatch). Kimi's docs/screenshots were older copies.
+**Fixes applied:** fonts self-hosted with `@fontsource-variable/baloo-2` and `@fontsource-variable/plus-jakarta-sans` (OFL-1.1) instead of Google Fonts, so the site makes no third-party requests; FAQ no longer promises OXXO/SPEI (payment data undefined) or "cualquier celular" (iPhone untested); "intransferible" → "exclusivo".

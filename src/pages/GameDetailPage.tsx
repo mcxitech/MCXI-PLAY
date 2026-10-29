@@ -1,9 +1,13 @@
 import { Link, useParams } from 'react-router-dom'
-import { GAME_TEMPLATES, formatPriceMXN } from '@/lib/constants'
+import { formatPriceMXN } from '@/lib/constants'
+import { useTemplates } from '@/lib/useTemplates'
 
 export default function GameDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const game = GAME_TEMPLATES.find((g) => g.slug === slug)
+  const { templates, loading } = useTemplates()
+  const game = templates.find((g) => g.slug === slug)
+
+  if (loading) return <p className="text-center text-purple-300 py-20">Cargando...</p>
 
   if (!game) {
     return (

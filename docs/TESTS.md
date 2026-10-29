@@ -172,6 +172,15 @@ Note: setting the real `database_id` (Phase 10) gave wrangler a new empty local 
 
 Not verified visually: preview victory screen (teaser + lock); covered by the bundle string check.
 
+## Phase 11 (technical support)
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Price from D1 | admin `PATCH /templates/:id {price_mxn:19900}`, then CDP read of `/`, `/juego/...`, `/personalizar/...`; `POST /api/orders` | All show $199 MXN; order charges 19900 | 2026-10-29 |
+| Deactivated template | admin `{active:0}` | Home "Próximamente…", detail "Juego no encontrado"; restored to active, $149 | 2026-10-29 |
+| Build + lint + regression | `npm run build`, `npm run lint`, `npm run test:api` | Pass, 25/25 | 2026-10-29 |
+| Marketing screenshots | CDP capture (390x844 @2x, 1280x800) with sample data | 7 PNG in `docs/marketing/` | 2026-10-29 |
+
 ## Manual Tests Pending
 - Owner: set production admin password (`npm run admin:password`) and log in at `/admin/login`.
 - Real phone (Android/iPhone) on the production URL: full purchase, play a gift to the dedication, download and open the ZIP.

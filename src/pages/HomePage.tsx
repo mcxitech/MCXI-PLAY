@@ -1,5 +1,6 @@
 import GameCard from '@/components/GameCard'
-import { GAME_TEMPLATES, SITE_NAME } from '@/lib/constants'
+import { SITE_NAME } from '@/lib/constants'
+import { useTemplates } from '@/lib/useTemplates'
 
 const STEPS = [
   {
@@ -20,7 +21,8 @@ const STEPS = [
 ]
 
 export default function HomePage() {
-  const available = GAME_TEMPLATES.filter((g) => g.available)
+  const { templates, loading } = useTemplates()
+  const available = templates.filter((g) => g.available)
 
   return (
     <>
@@ -81,7 +83,7 @@ export default function HomePage() {
               <GameCard key={game.slug} game={game} />
             ))}
           </div>
-          {available.length === 0 && (
+          {!loading && available.length === 0 && (
             <p className="text-center text-purple-400">Próximamente agregaremos nuevos juegos.</p>
           )}
         </div>

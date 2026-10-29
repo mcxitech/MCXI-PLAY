@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import PhaserGame from '@/components/PhaserGame'
-import { GAME_TEMPLATES, formatPriceMXN } from '@/lib/constants'
+import { formatPriceMXN } from '@/lib/constants'
+import { useTemplates } from '@/lib/useTemplates'
 import { sanitizeText, LIMITS } from '@/lib/sanitize'
 import { api } from '@/lib/api'
 import type { GameConfig } from '@/game/config'
@@ -24,7 +25,8 @@ type Step = 'form' | 'preview' | 'summary'
 
 export default function CustomizePage() {
   const { slug } = useParams<{ slug: string }>()
-  const game = GAME_TEMPLATES.find((g) => g.slug === slug)
+  const { templates, loading } = useTemplates()
+  const game = templates.find((g) => g.slug === slug)
 
   const [recipientName, setRecipientName] = useState('')
   const [senderName, setSenderName] = useState('')
@@ -76,6 +78,8 @@ export default function CustomizePage() {
       setSubmitting(false)
     }
   }
+
+  if (loading) return <p className="text-center text-purple-300 py-20">Cargando...</p>
 
   if (!game) {
     return (

@@ -36,5 +36,10 @@ Since the real `database_id` is in `wrangler.toml`, local D1 is a new database: 
 4. Real payment data in `PAYMENT_INFO`.
 5. Ask Codex to review D020.
 
+## Phase 11 (Kimi/Gemini) — technical support done by Claude
+- Catalog name/description/price/active now come from D1 (`src/lib/useTemplates.ts`), so admin edits show on the site and match what orders charge.
+- 7 real screenshots in `docs/marketing/`; brief for copywriters in `docs/LAUNCH_BRIEF.md`.
+- Still for the owner/other AIs: victory-screen screenshot and short video (from a phone), all copywriting items, privacy/terms review, real purchase test.
+
 ## Next Task
-Owner deploys and reviews. Then Codex audit of D020.
+Owner deploys (includes D020 + price fix) and reviews. Then: Codex audit of D020; Kimi/Gemini work from docs/LAUNCH_BRIEF.md.

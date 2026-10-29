@@ -98,7 +98,26 @@
 | Re-enable recipient link | `PATCH .../gift-access {active:true}` | 200 | 2026-10-29 |
 | Audit trail | `GET /api/admin/audit` | gift.enabled, gift.disabled, gift.token_rotated, gift.activated | 2026-10-29 |
 
+## Phase 8
+
+Browser tests use headless Chrome driven over CDP (scripts kept outside the repo).
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Full build incl. export kit | `npm run build` | Pass — `dist/export-kit/game.js` 1.2 MB | 2026-10-29 |
+| ZIP contents (Node, production `buildGiftZip`) | config with extra fields (email, token, other order) + `</script>` payload | 5 files only; no extra fields; `<` escaped in config.js and title; no external URLs | 2026-10-29 |
+| Engine has no admin/API code | grep `/api/`, `admin`, `react`, `mcxi_admin_session` in `game.js` | 0 matches | 2026-10-29 |
+| ZIP opened via `file://`, network blocked | Chrome headless + CDP, wait 3 s, screenshot | Game running, custom colors, 0 JS errors, 0 network requests | 2026-10-29 |
+| Engine served with JS type | `curl /export-kit/game.js` | 200 `text/javascript` | 2026-10-29 |
+| Missing kit file | `curl /export-kit/nada.js` | 200 `text/html` (SPA fallback) → exporter checks Content-Type | 2026-10-29 |
+| Admin detail exposes gift config only with session | `GET /api/admin/orders/:id` | With session: `gift.config`; without: 401 | 2026-10-29 |
+| Buyer page (390x844) | open `/mi-regalo/:token`, click "Descargar ZIP" | Page renders, ZIP downloaded (326 KB), 0 JS errors | 2026-10-29 |
+| Recipient page (390x844) | open `/regalo/:slug`, click "Jugar"; open `/regalo/NOEXISTE123` | Intro + canvas; "Este regalo no está disponible" | 2026-10-29 |
+| Admin UI login + export (1280x900) | login form → `/admin/pedidos/:id` → "Descargar ZIP" | Redirect to `/admin`, links shown, ZIP downloaded, 0 JS errors | 2026-10-29 |
+| Dependency audit | `npm audit` after `npm audit fix` (fflate 0.8.3) | 0 vulnerabilities | 2026-10-29 |
+
 ## Manual Tests Pending
-- Admin login through the browser UI after the session-cookie change.
-- Phase 7 in browser (desktop + phone): customize → submit order → `/pedido` page → admin pay/activate → copy links → `/mi-regalo` → `/regalo` played to the end.
+- Customize form → "Solicitar compra" → `/pedido` page in a real browser (desktop + phone). Not clicked yet.
+- Play a gift to the end (dedication screen) on a real phone, both online and from an exported ZIP.
+- Exported ZIP served over http (`python -m http.server` / `npx serve`) and in Safari/Firefox: not verified.
 - Lint is broken until TypeScript and typescript-eslint versions are aligned.

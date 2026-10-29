@@ -81,7 +81,7 @@ export async function handleAdminRoutes(
       ...order,
       personalization: JSON.parse(order.personalization),
       buyer: buyer ? { name: buyer.name, email: buyer.email } : null,
-      gift: gift ? { publicSlug: gift.public_slug, buyerToken: gift.buyer_token, playCount: gift.play_count, active: Boolean(gift.active) } : null,
+      gift: gift ? { publicSlug: gift.public_slug, buyerToken: gift.buyer_token, playCount: gift.play_count, active: Boolean(gift.active), config: JSON.parse(gift.config) } : null,
       templateName: template?.name,
     })
   }

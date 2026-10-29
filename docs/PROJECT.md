@@ -192,7 +192,6 @@ audit_log
 | GET | `/api/orders/:orderNumber` | Public | Get order status (limited info) |
 | GET | `/api/gifts/:publicSlug` | Public | Get gift config for play |
 | GET | `/api/gifts/manage/:buyerToken` | Buyer | Get gift management info |
-| GET | `/api/gifts/export/:buyerToken` | Buyer | Download ZIP |
 | GET | `/api/templates` | Public | List active templates |
 | GET | `/api/templates/:slug` | Public | Get template detail |
 | POST | `/api/admin/login` | — | Admin login |
@@ -205,7 +204,9 @@ audit_log
 | PATCH | `/api/admin/orders/:id/gift-access` | Admin | Enable/disable recipient link |
 | GET | `/api/admin/templates` | Admin | List all templates |
 | PATCH | `/api/admin/templates/:id` | Admin | Update template |
-| GET | `/api/admin/gifts/:id/export` | Admin | Generate ZIP |
+| GET | `/export-kit/game.js` | Static | Standalone engine used inside ZIPs (no gift data) |
+
+ZIPs are built in the browser (D017): the buyer page gets the config from `/api/gifts/manage/:buyerToken`, the admin page from `/api/admin/orders/:id` (`gift.config`). There is no server-side export endpoint.
 | GET | `/api/admin/stats` | Admin | Dashboard stats |
 
 ---
@@ -238,20 +239,17 @@ The Phaser game reads this config at runtime — the same compiled game code ren
 The export creates a self-contained folder:
 ```
 regalo-MCXI-XXXX/
-├── index.html          # Standalone game page
-├── assets/             # Game assets (sprites, audio)
-├── game.js             # Compiled Phaser game bundle
-├── config.json         # This gift's personalization
-├── style.css           # Minimal styles
-├── README.txt          # Instructions in Spanish
+├── index.html          # Standalone page with inline CSS
+├── game.js             # Phaser engine (IIFE, ~1.2 MB; graphics and sounds are generated in code)
+├── config.js           # window.MCXI_GIFT_CONFIG = {...} for this gift only
+├── LEEME.txt           # Instructions in Spanish (open, local server, free hosting)
 └── LICENCIA.txt        # Personal use license
 ```
 
-- `index.html` loads `game.js` which reads `config.json` at startup.
-- No server needed — works from any static file server.
-- Does NOT include: admin code, API code, other buyers' data, source TypeScript.
-- `file://` protocol compatibility: tested but not guaranteed (documented in README.txt).
-- Build process: Vite builds game bundle separately; Worker generates ZIP on demand using the compiled bundle + per-gift config.
+- `index.html` loads `config.js` then `game.js` as classic scripts (not ES modules), so double-click (`file://`) works. Verified offline in Chrome; other browsers not verified, LEEME.txt gives a local-server fallback.
+- No assets folder: the game draws everything with Phaser Graphics and synthesizes sound.
+- Does NOT include: React, admin code, API calls, other buyers' data, source TypeScript (verified by scanning `game.js`).
+- Build: `vite build -c vite.export.config.ts` → `dist/export-kit/game.js` (entry `src/export/main.ts`). The ZIP is assembled client-side in `src/lib/exportGift.ts` with `fflate`.
 
 ---
 

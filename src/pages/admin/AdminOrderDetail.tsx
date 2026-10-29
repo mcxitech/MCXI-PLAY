@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { adminApi, type OrderDetail } from '@/lib/admin-api'
 import CopyButton from '@/components/CopyButton'
+import { downloadGiftZip } from '@/lib/exportGift'
 
 const SMALL_BTN = 'bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs shrink-0'
 
@@ -87,6 +88,23 @@ export default function AdminOrderDetail() {
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => doAction('rotate')} disabled={actionLoading} className={SMALL_BTN}>
                   Revocar y regenerar enlace del comprador
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!order.gift) return
+                    setActionLoading(true)
+                    try {
+                      await downloadGiftZip(order.gift.config, order.order_number)
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Error al exportar')
+                    } finally {
+                      setActionLoading(false)
+                    }
+                  }}
+                  disabled={actionLoading}
+                  className="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-xs shrink-0"
+                >
+                  Descargar ZIP
                 </button>
                 {order.gift.active ? (
                   <button onClick={() => doAction('disable')} disabled={actionLoading} className={SMALL_BTN}>

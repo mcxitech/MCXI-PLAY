@@ -89,3 +89,10 @@
 **Date:** 2026-10-29
 **Decision:** `not_found_handling = "single-page-application"` and `run_worker_first = ["/api/*"]` in `wrangler.toml`.
 **Reason:** Without it, direct links such as `/regalo/:slug` returned 404 in `wrangler dev` (and would in production).
+
+## D017 — ZIP export built in the browser
+**Date:** 2026-10-29
+**Decision:** A second Vite build (`vite.export.config.ts`) emits a standalone IIFE engine to `dist/export-kit/game.js`. The admin/buyer page fetches it, takes the gift config from an already-authorized endpoint, and builds the ZIP client-side with `fflate`.
+**Alternatives:** Generate the ZIP in the Worker (rejected: compressing ~1.2 MB exceeds the ~10 ms CPU limit of the free plan); pre-built ZIP per gift in storage (needs R2/KV, extra infrastructure).
+**Reason:** $0, no CPU limit, no new endpoints. The engine is public anyway (it ships in the SPA); only the config needs authorization.
+**Trade-off:** Downloads are not recorded in the audit log.

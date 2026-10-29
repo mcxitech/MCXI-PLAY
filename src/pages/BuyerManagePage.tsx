@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, type GiftManage } from '@/lib/api'
 import CopyButton from '@/components/CopyButton'
+import { downloadGiftZip } from '@/lib/exportGift'
 
 // Buyer page: reachable only with the private token. Shows the shareable recipient link.
 export default function BuyerManagePage() {
   const { buyerToken } = useParams<{ buyerToken: string }>()
   const [gift, setGift] = useState<GiftManage | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
 
   useEffect(() => {
     if (!buyerToken) return
@@ -76,6 +79,35 @@ export default function BuyerManagePage() {
           <p className="text-sm text-red-300">El enlace del regalo está desactivado. Contáctanos si necesitas reactivarlo.</p>
         )}
       </div>
+
+      {gift.active && (
+        <div className="bg-slate-800/60 border border-purple-900/30 rounded-xl p-6 space-y-3">
+          <h2 className="text-white font-semibold">Copia descargable</h2>
+          <p className="text-sm text-purple-300">
+            Descarga un ZIP con tu regalo para conservarlo o publicarlo por tu cuenta. Funciona sin internet;
+            las instrucciones vienen dentro (LEEME.txt).
+          </p>
+          {exportError && <p className="text-sm text-red-400">{exportError}</p>}
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={async () => {
+              setExporting(true)
+              setExportError('')
+              try {
+                await downloadGiftZip(gift.config, gift.orderNumber)
+              } catch (err) {
+                setExportError(err instanceof Error ? err.message : 'No se pudo generar el ZIP')
+              } finally {
+                setExporting(false)
+              }
+            }}
+            className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          >
+            {exporting ? 'Preparando ZIP...' : 'Descargar ZIP'}
+          </button>
+        </div>
+      )}
 
       <div className="bg-slate-800/60 border border-purple-900/30 rounded-xl p-6">
         <dl className="space-y-2 text-sm">

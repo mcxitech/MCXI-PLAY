@@ -1,3 +1,5 @@
+import type { GameConfig } from '@/game/config'
+
 const BASE = '/api/admin'
 
 async function request<T>(path: string, opts?: RequestInit): Promise<T> {
@@ -65,7 +67,7 @@ export interface OrderDetail {
   payment_note: string | null
   personalization: Record<string, unknown>
   buyer: { name: string; email: string } | null
-  gift: { publicSlug: string; buyerToken: string; playCount: number; active: boolean } | null
+  gift: { publicSlug: string; buyerToken: string; playCount: number; active: boolean; config: GameConfig } | null
   templateName: string
   created_at: string
 }

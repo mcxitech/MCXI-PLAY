@@ -166,8 +166,8 @@
 - [x] Crear token privado de gestión del comprador.
 - [x] Separar los permisos de ambos enlaces.
 - [x] Implementar revocación de acceso privado.
-- [ ] Crear página del destinatario. (`GiftPage` implementada; API verificada. Falta jugarla en navegador/celular.)
-- [ ] Crear página de gestión del comprador. (`BuyerManagePage` implementada; API verificada. Falta probar en navegador.)
+- [x] Crear página del destinatario. (Verificada en Chrome headless 390x844: intro, juego y regalo inexistente.)
+- [x] Crear página de gestión del comprador. (Verificada en Chrome headless 390x844.)
 - [x] Impedir el acceso a regalos pendientes.
 - [x] Probar múltiples compras independientes.
 
@@ -176,21 +176,21 @@
 ## FASE 8 — Exportación Individual
 **Responsable: Claude Code**
 
-- [ ] Separar motor de juego y configuración.
-- [ ] Preparar compilación independiente del videojuego.
-- [ ] Incluir datos específicos de un comprador.
-- [ ] Incluir imágenes, audio y estilos necesarios.
-- [ ] Crear exportador ZIP.
-- [ ] Incorporar exportación al dashboard.
-- [ ] Permitir descarga autorizada al comprador.
-- [ ] Crear README para el destinatario.
-- [ ] Crear documento de licencia de uso personal.
-- [ ] Evitar incluir código fuente administrativo.
-- [ ] Evitar incluir información de otros compradores.
-- [ ] Probar funcionamiento sin D1.
-- [ ] Probar funcionamiento sin APIs de MCXI.
-- [ ] Comprobar funcionamiento con conexión y sin conexión cuando sea técnicamente viable.
-- [ ] Documentar cómo alojar el juego fuera de MCXI.
+- [x] Separar motor de juego y configuración.
+- [x] Preparar compilación independiente del videojuego.
+- [x] Incluir datos específicos de un comprador.
+- [x] Incluir imágenes, audio y estilos necesarios. (No hay archivos externos: gráficos y sonido se generan en código; CSS inline.)
+- [x] Crear exportador ZIP.
+- [x] Incorporar exportación al dashboard.
+- [x] Permitir descarga autorizada al comprador.
+- [x] Crear README para el destinatario. (`LEEME.txt`)
+- [x] Crear documento de licencia de uso personal. (`LICENCIA.txt`)
+- [x] Evitar incluir código fuente administrativo.
+- [x] Evitar incluir información de otros compradores.
+- [x] Probar funcionamiento sin D1.
+- [x] Probar funcionamiento sin APIs de MCXI.
+- [x] Comprobar funcionamiento con conexión y sin conexión cuando sea técnicamente viable. (Sin conexión vía `file://` verificado en Chrome. Servidor local http no probado.)
+- [x] Documentar cómo alojar el juego fuera de MCXI. (En `LEEME.txt` del ZIP: Cloudflare Pages, Netlify Drop, GitHub Pages, servidor local.)
 
 ---
 

@@ -58,6 +58,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** dos solicitudes concurrentes pueden producir auditorías duplicadas, respuestas 500 por la restricción única de `gifts.order_id`, o una combinación inconsistente como regalo creado/activo con pedido finalmente cancelado. El esquema evita dos regalos persistentes, pero no evita estados intermedios ni la carrera de autorización de transición.
 - **Corrección mínima sugerida:** usar transacciones/batches cuando estén disponibles y actualizaciones condicionales (`UPDATE ... WHERE id = ? AND status = 'paid'`), comprobar el resultado afectado y crear el regalo dentro de una operación atómica o con idempotencia explícita. Registrar solo la transición que realmente ganó.
 - **Estado:** **riesgo potencial confirmado por estructura de código; no se ejecutó una prueba concurrente por falta de dependencias/entorno D1 local**.
+- **Corrección (2026-10-29, Claude Code):** pago y cancelación usan `UPDATE ... WHERE status IN (...)` y verifican `meta.changes` (409 si otro request ganó). La activación es un `db.batch` (transacción): inserta el regalo con `INSERT ... SELECT ... WHERE status = 'paid'` y luego cambia el estado. Prueba de regresión: 6 activaciones concurrentes → exactamente 1 éxito y 1 regalo.
 
 ### MEDIA — SEC-006 — Número de pedido corto, enumerable y sin protección contra abuso
 
@@ -66,6 +67,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** permite enumerar pedidos y descubrir estados, precios y nombres de plantilla; tras activación, puede convertirse en acceso de comprador por la filtración del token. El riesgo aumenta con reintentos distribuidos y ausencia de controles de abuso.
 - **Corrección mínima sugerida:** no usar el número humano como credencial; eliminar el token de la respuesta pública. Añadir rate limiting, respuestas uniformes para no existentes y, si la consulta pública debe mantenerse, un secreto adicional o enlace de consulta de un solo uso.
 - **Estado:** **riesgo potencial confirmado por diseño; el impacto de toma de control se materializa junto con SEC-002**.
+- **Corrección (2026-10-29, Claude Code):** número de pedido con 8 caracteres aleatorios (~45 bits). Rate limiting en D1 (`rate_limits`, ventana fija por IP vía `CF-Connecting-IP`): login 10/15 min, creación de pedidos 10/hora. No se limitan los GET públicos (cada hit costaría una escritura D1); slugs (~68 bits) y tokens (~182 bits) no son enumerables.
 
 ### MEDIA — SEC-007 — Compradores se fusionan por email globalmente, contradiciendo el aislamiento por pedido
 
@@ -74,6 +76,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** una solicitud pública con el email de otra persona puede cambiar el nombre mostrado en todos sus pedidos administrativos. Esto causa contaminación entre compradores y pérdida de integridad; no expone por sí solo las configuraciones de los regalos porque los pedidos siguen enlazados individualmente.
 - **Corrección mínima sugerida:** crear un comprador por pedido, o definir explícitamente una identidad global con controles de verificación de posesión del email. No permitir que una solicitud pública cambie datos asociados a otros pedidos.
 - **Estado:** **confirmada por lectura de código**.
+- **Corrección (2026-10-29, Claude Code):** se crea un comprador nuevo por pedido (`createBuyer`); ya no se reutiliza ni sobrescribe por email.
 
 ### BAJA / BLOQUEADOR DE ALCANCE — SEC-008 — Exportación independiente no implementada; no puede auditarse el aislamiento del ZIP
 
@@ -82,6 +85,7 @@ También hay fallos confirmados de control de estado y aislamiento lógico, y va
 - **Impacto:** actualmente no se observa una filtración de ZIP porque la funcionalidad no existe, pero la entrega del token (SEC-002) ya compromete la autorización que debería protegerla. No es posible afirmar que un ZIP futuro contendrá únicamente los datos del comprador.
 - **Corrección mínima sugerida:** implementar la exportación solo después de fijar la autorización por token/sesión; construir el archivo con una lista blanca de assets y una única configuración asociada al `gift/order_id`, sin rutas controladas por usuario ni contenido de otros pedidos; añadir pruebas de aislamiento entre dos compradores.
 - **Estado:** **deficiencia confirmada, no vulnerabilidad explotable en la versión revisada**.
+- **Actualización (2026-10-29):** exportación implementada en Fase 8 (D017): ZIP armado en el navegador a partir de la config obtenida por endpoint autorizado (token de comprador o sesión admin); lista blanca de 5 archivos. Pendiente de auditoría por Codex.
 
 ## Riesgos revisados sin hallazgo explotable confirmado
 

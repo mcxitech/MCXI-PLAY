@@ -50,7 +50,13 @@ export async function handlePublicRoutes(
     const template = await repo.getTemplateBySlug(data.templateSlug)
     if (!template || !template.active) return jsonError('Plantilla no encontrada', 404)
 
-    const buyer = await repo.findOrCreateBuyer(data.buyerName, data.buyerEmail)
+    // SEC-006: limit order spam per IP (each order writes to D1)
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    if (await repo.isRateLimited(`order:${ip}`, 10, 60 * 60)) {
+      return jsonError('Demasiados pedidos desde tu conexión. Intenta más tarde.', 429)
+    }
+
+    const buyer = await repo.createBuyer(data.buyerName, data.buyerEmail)
     const order = await repo.createOrder(buyer.id, template.id, data.personalization, template.price_mxn)
 
     await repo.auditLog('order.created', 'order', order.id, 'system', {

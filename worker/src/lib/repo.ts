@@ -66,15 +66,8 @@ export class Repo {
     return this.db.prepare('SELECT * FROM templates WHERE id = ?').bind(id).first<Template>()
   }
 
-  async findOrCreateBuyer(name: string, email: string): Promise<Buyer> {
-    const existing = await this.db.prepare('SELECT * FROM buyers WHERE email = ? LIMIT 1').bind(email).first<Buyer>()
-    if (existing) {
-      if (existing.name !== name) {
-        await this.db.prepare('UPDATE buyers SET name = ? WHERE id = ?').bind(name, existing.id).run()
-        existing.name = name
-      }
-      return existing
-    }
+  // One buyer row per order: a public request must never touch data of other orders (SEC-007)
+  async createBuyer(name: string, email: string): Promise<Buyer> {
     const id = ulid()
     const now = new Date().toISOString()
     await this.db
@@ -127,33 +120,64 @@ export class Repo {
     return r.results
   }
 
-  async updateOrderStatus(id: string, status: string, extra?: { payment_date?: string; payment_note?: string }): Promise<void> {
+  // Conditional transition: only succeeds if the order is still in one of `from` (SEC-005).
+  // Returns false when another request changed it first.
+  async transitionOrder(
+    id: string,
+    from: string[],
+    to: string,
+    extra?: { payment_date?: string; payment_note?: string },
+  ): Promise<boolean> {
     const now = new Date().toISOString()
-    await this.db
-      .prepare('UPDATE orders SET status = ?, payment_date = COALESCE(?, payment_date), payment_note = COALESCE(?, payment_note), updated_at = ? WHERE id = ?')
-      .bind(status, extra?.payment_date ?? null, extra?.payment_note ?? null, now, id)
+    const r = await this.db
+      .prepare(
+        `UPDATE orders SET status = ?, payment_date = COALESCE(?, payment_date), payment_note = COALESCE(?, payment_note), updated_at = ?
+         WHERE id = ? AND status IN (${from.map(() => '?').join(', ')})`,
+      )
+      .bind(to, extra?.payment_date ?? null, extra?.payment_note ?? null, now, id, ...from)
       .run()
+    return r.meta.changes === 1
   }
 
-  async createGift(orderId: string, config: PersonalizationInput): Promise<Gift> {
+  // Atomic activation (SEC-005): D1 batch runs as one transaction. The gift is inserted
+  // only while the order is still 'paid', then the order moves to 'activated'.
+  // Returns null if the order was not 'paid' (already activated, cancelled, or concurrent request).
+  async activateOrder(orderId: string): Promise<Gift | null> {
     const id = ulid()
     const publicSlug = generatePublicSlug()
     const buyerToken = generateBuyerToken()
     const now = new Date().toISOString()
-    const configJson = JSON.stringify(config)
 
-    await this.db
+    const [insert] = await this.db.batch([
+      this.db
+        .prepare(
+          `INSERT INTO gifts (id, order_id, public_slug, buyer_token, config, active, play_count, created_at, updated_at)
+           SELECT ?, id, ?, ?, personalization, 1, 0, ?, ? FROM orders WHERE id = ? AND status = 'paid'`,
+        )
+        .bind(id, publicSlug, buyerToken, now, now, orderId),
+      this.db
+        .prepare(`UPDATE orders SET status = 'activated', updated_at = ? WHERE id = ? AND status = 'paid'`)
+        .bind(now, orderId),
+    ])
+    if (insert?.meta.changes !== 1) return null
+    return this.getGiftByOrderId(orderId)
+  }
+
+  // Fixed-window counter. Returns true when the caller is over the limit.
+  async isRateLimited(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+    const now = Math.floor(Date.now() / 1000)
+    const windowStart = now - (now % windowSeconds)
+    const row = await this.db
       .prepare(
-        `INSERT INTO gifts (id, order_id, public_slug, buyer_token, config, active, play_count, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)`,
+        `INSERT INTO rate_limits (key, window_start, count) VALUES (?, ?, 1)
+         ON CONFLICT(key) DO UPDATE SET
+           count = CASE WHEN window_start = excluded.window_start THEN count + 1 ELSE 1 END,
+           window_start = excluded.window_start
+         RETURNING count`,
       )
-      .bind(id, orderId, publicSlug, buyerToken, configJson, now, now)
-      .run()
-
-    return {
-      id, order_id: orderId, public_slug: publicSlug, buyer_token: buyerToken,
-      config: configJson, active: 1, play_count: 0, created_at: now, updated_at: now,
-    }
+      .bind(key, windowStart)
+      .first<{ count: number }>()
+    return (row?.count ?? 0) > limit
   }
 
   async getGiftByPublicSlug(slug: string): Promise<Gift | null> {

@@ -15,7 +15,8 @@ export function ulid(): string {
 export function generateOrderNumber(): string {
   const now = new Date()
   const date = now.toISOString().slice(0, 10).replace(/-/g, '')
-  const rand = randomAlphanumeric(4)
+  // 8 chars (~45 bits) so order numbers can't be enumerated (SEC-006)
+  const rand = randomAlphanumeric(8)
   return `MCXI-${date}-${rand}`
 }
 

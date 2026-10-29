@@ -1,7 +1,6 @@
 import { Repo } from '../lib/repo'
 import { json, jsonError, readJson } from '../lib/json'
 import { verifyPassword, createSessionCookie, clearSessionCookie, isAuthenticated } from '../lib/auth'
-import type { PersonalizationInput } from '../lib/validate'
 
 export async function handleAdminRoutes(
   request: Request,
@@ -22,6 +21,11 @@ export async function handleAdminRoutes(
 
   // Login — no auth required
   if (method === 'POST' && pathname === '/api/admin/login') {
+    // SEC-006: slow down password guessing (counts every attempt, per IP)
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    if (await repo.isRateLimited(`login:${ip}`, 10, 15 * 60)) {
+      return jsonError('Demasiados intentos. Espera 15 minutos.', 429)
+    }
     const body = (await readJson(request)) as Record<string, unknown> | null
     const password = typeof body?.['password'] === 'string' ? body['password'] : ''
     if (!password) return jsonError('Contraseña requerida', 400)
@@ -96,10 +100,11 @@ export async function handleAdminRoutes(
     const body = (await readJson(request)) as Record<string, unknown> | null
     const note = typeof body?.['paymentNote'] === 'string' ? body['paymentNote'].slice(0, 200) : undefined
 
-    await repo.updateOrderStatus(order.id, 'paid', {
+    const changed = await repo.transitionOrder(order.id, ['pending'], 'paid', {
       payment_date: new Date().toISOString(),
       payment_note: note,
     })
+    if (!changed) return jsonError('El pedido cambió de estado; recarga la página', 409)
     await repo.auditLog('payment.confirmed', 'order', order.id, 'admin', { note })
     return json({ ok: true, status: 'paid' })
   }
@@ -111,12 +116,8 @@ export async function handleAdminRoutes(
     if (!order) return jsonError('Pedido no encontrado', 404)
     if (order.status !== 'paid') return jsonError('Solo se pueden activar pedidos pagados', 400)
 
-    const existing = await repo.getGiftByOrderId(order.id)
-    if (existing) return jsonError('El regalo ya fue activado', 400)
-
-    const personalization = JSON.parse(order.personalization) as PersonalizationInput
-    const gift = await repo.createGift(order.id, personalization)
-    await repo.updateOrderStatus(order.id, 'activated')
+    const gift = await repo.activateOrder(order.id)
+    if (!gift) return jsonError('El pedido cambió de estado; recarga la página', 409)
     await repo.auditLog('gift.activated', 'order', order.id, 'admin', {
       giftId: gift.id,
       publicSlug: gift.public_slug,
@@ -134,7 +135,8 @@ export async function handleAdminRoutes(
       return jsonError('Solo se pueden cancelar pedidos pendientes o pagados', 400)
     }
 
-    await repo.updateOrderStatus(order.id, 'cancelled')
+    const changed = await repo.transitionOrder(order.id, ['pending', 'paid'], 'cancelled')
+    if (!changed) return jsonError('El pedido cambió de estado; recarga la página', 409)
     await repo.auditLog('order.cancelled', 'order', order.id, 'admin')
     return json({ ok: true, status: 'cancelled' })
   }

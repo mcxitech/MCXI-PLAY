@@ -210,7 +210,7 @@
 - [ ] Revisar secretos y variables de entorno.
 - [ ] Revisar exportaciones ZIP.
 - [ ] Revisar fallos de concurrencia en activación.
-- [ ] Crear pruebas de regresión.
+- [x] Crear pruebas de regresión. (`tests/api.test.mjs`, 16 pruebas; `npm run test:api`. Hecho por Claude antes de la auditoría.)
 - [ ] Corregir problemas críticos y altos.
 - [ ] Ejecutar build final.
 

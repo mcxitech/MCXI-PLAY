@@ -116,7 +116,16 @@ Browser tests use headless Chrome driven over CDP (scripts kept outside the repo
 | Admin UI login + export (1280x900) | login form → `/admin/pedidos/:id` → "Descargar ZIP" | Redirect to `/admin`, links shown, ZIP downloaded, 0 JS errors | 2026-10-29 |
 | Dependency audit | `npm audit` after `npm audit fix` (fflate 0.8.3) | 0 vulnerabilities | 2026-10-29 |
 
+## Pre-audit fixes (SEC-005/006/007) and regression suite
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Purchase form + order page in browser (390x844) | CDP: fill customizer → preview → summary → buyer data → "Solicitar compra" | Redirect to `/pedido/MCXI-...`, "Pendiente de pago", payment instructions; button disabled until buyer data; unknown order → "Pedido no encontrado"; 0 JS errors | 2026-10-29 |
+| Lint after TS 6.0 | `npm run lint` | Pass, 0 problems | 2026-10-29 |
+| Migration 0002 | `npx wrangler d1 migrations apply mcxi-play-db --local` | Applied | 2026-10-29 |
+| Login rate limit (manual) | 11 failed logins same IP, then other IP | 401 x10, 429, other IP 401 | 2026-10-29 |
+| Regression suite | `ADMIN_PASSWORD=... npm run test:api` | **16/16 pass** (auth, rate limits, validation/XSS, public data, SEC-007, concurrency x6 activate / x5 pay, cancel rules, link isolation, revocation, SPA + export engine) | 2026-10-29 |
+
 ## Manual Tests Pending
-- Customize form → "Solicitar compra" → `/pedido` page in a real browser (desktop + phone). Not clicked yet.
 - Play a gift to the end (dedication screen) on a real phone, both online and from an exported ZIP.
 - Exported ZIP served over http (`python -m http.server` / `npx serve`) and in Safari/Firefox: not verified.

@@ -4,7 +4,7 @@
 Commercial platform for personalized gift videogames. React + Vite + TypeScript frontend, Phaser 3 games, Cloudflare Workers + D1 backend.
 
 ## Stack
-- Frontend: React 19, Vite 8, TypeScript 7, Tailwind CSS 4
+- Frontend: React 19, Vite 8, TypeScript 6.0 (D018), Tailwind CSS 4
 - Games: Phaser 3
 - Backend: Cloudflare Workers with Static Assets, D1
 - Deployment: Cloudflare (free tier)
@@ -26,7 +26,8 @@ Commercial platform for personalized gift videogames. React + Vite + TypeScript 
 
 ## Commands
 - `npm run dev` — Start Vite dev server
-- `npm run build` — TypeScript check + Vite build
+- `npm run build` — TypeScript check + Vite build (app + export engine)
+- `ADMIN_PASSWORD=<pw> npm run test:api` — API/security regression tests (needs `npx wrangler dev` running)
 - `npm run lint` — ESLint
 - `npm run typecheck` — TypeScript only
 - `npm run worker:dev` — Wrangler local dev

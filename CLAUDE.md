@@ -40,4 +40,5 @@ Commercial platform for personalized gift videogames. React + Vite + TypeScript 
 - `docs/DECISIONS.md` — Technical decisions
 - `docs/HANDOFF.md` — Current state for AI handoff
 - `docs/TESTS.md` — Test log
+- `docs/MARKETING.md` — Official marketing module (copies, prices, WhatsApp scripts). Keep site facts and copies consistent; never add features just because a copy mentions them.
 - `AGENTS.md` — Instructions for Codex

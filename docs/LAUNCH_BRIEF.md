@@ -1,6 +1,7 @@
 # MCXI Play — Brief para lanzamiento (Kimi / Gemini)
 
 Usa solo estos datos. No inventes funciones, precios ni plazos que no estén aquí.
+**Módulo oficial de copies y estrategia:** `docs/MARKETING.md` (incluye ajustes técnicos y tabla de consistencia).
 
 ## Producto
 - **Marca:** MCXI Play — "Regalos que se juegan".

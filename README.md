@@ -28,5 +28,6 @@ npm run typecheck  # Verificación de tipos
 - [Handoff](docs/HANDOFF.md) — Estado actual
 - [Tests](docs/TESTS.md) — Registro de pruebas
 - [Despliegue](docs/DEPLOY.md) — Publicar, secretos y recuperación
+- [Marketing](docs/MARKETING.md) — Copies, precios y estrategia comercial
 
 Producción: https://mcxi-play.mcxi-tech.workers.dev

@@ -197,22 +197,22 @@
 ## FASE 9 — Seguridad y Calidad
 **Responsable auditor: Codex | Correcciones: Claude Code**
 
-- [ ] Revisar autenticación administrativa.
-- [ ] Revisar autorización en endpoints.
-- [ ] Revisar tokens de compradores.
-- [ ] Revisar enlaces de destinatarios.
-- [ ] Revisar validación de pedidos.
-- [ ] Revisar posibilidad de activar pagos sin permiso.
-- [ ] Revisar XSS.
-- [ ] Revisar inyección SQL.
-- [ ] Revisar seguridad de cookies y sesiones.
-- [ ] Revisar filtración de datos.
-- [ ] Revisar secretos y variables de entorno.
-- [ ] Revisar exportaciones ZIP.
-- [ ] Revisar fallos de concurrencia en activación.
-- [x] Crear pruebas de regresión. (`tests/api.test.mjs`, 16 pruebas; `npm run test:api`. Hecho por Claude antes de la auditoría.)
-- [ ] Corregir problemas críticos y altos.
-- [ ] Ejecutar build final.
+- [x] Revisar autenticación administrativa. (Codex, `docs/SECURITY_REVIEW.md`)
+- [x] Revisar autorización en endpoints. (Codex)
+- [x] Revisar tokens de compradores. (Codex: SEC-002 media, política documentada en D019)
+- [x] Revisar enlaces de destinatarios. (Codex)
+- [x] Revisar validación de pedidos. (Primera auditoría de Codex + pruebas de regresión de 422/HTML)
+- [x] Revisar posibilidad de activar pagos sin permiso. (Codex + pruebas)
+- [x] Revisar XSS. (Codex: export escapado; React escapa por defecto)
+- [x] Revisar inyección SQL. (Codex: consultas parametrizadas)
+- [x] Revisar seguridad de cookies y sesiones. (Codex SEC-003 baja → corregido con validación de Origin)
+- [x] Revisar filtración de datos. (Codex)
+- [x] Revisar secretos y variables de entorno. (Claude: historial de Git sin `.dev.vars` ni valores de secretos; Codex no reportó hallazgos)
+- [x] Revisar exportaciones ZIP. (Codex: lista blanca, sin datos ajenos)
+- [x] Revisar fallos de concurrencia en activación. (Codex SEC-001 → cubierto con pruebas concurrentes)
+- [x] Crear pruebas de regresión. (`tests/api.test.mjs`, 18 pruebas; `npm run test:api`.)
+- [x] Corregir problemas críticos y altos. (La auditoría final no reportó críticos ni altos.)
+- [x] Ejecutar build final.
 
 ---
 

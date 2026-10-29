@@ -126,6 +126,16 @@ Browser tests use headless Chrome driven over CDP (scripts kept outside the repo
 | Login rate limit (manual) | 11 failed logins same IP, then other IP | 401 x10, 429, other IP 401 | 2026-10-29 |
 | Regression suite | `ADMIN_PASSWORD=... npm run test:api` | **16/16 pass** (auth, rate limits, validation/XSS, public data, SEC-007, concurrency x6 activate / x5 pay, cancel rules, link isolation, revocation, SPA + export engine) | 2026-10-29 |
 
+## Phase 9 (after Codex audit)
+
+| Test | Command | Result | Date |
+|------|---------|--------|------|
+| Codex audit | static review + typecheck/lint/build | No critical/high; 2 medium, 2 low (see `docs/SECURITY_REVIEW.md`) | 2026-10-29 |
+| Build, worker typecheck, lint | `npm run build`, `npx tsc -p worker/tsconfig.json --noEmit`, `npm run lint` | Pass | 2026-10-29 |
+| Secrets in Git history | `git log -p --all` searched for local hash/secret; `.dev.vars` history; `git grep` for `*_HASH=`/`SESSION_SECRET=` values | 0 matches | 2026-10-29 |
+| Regression suite | `ADMIN_PASSWORD=... npm run test:api` | **18/18 pass** (added: CSRF Origin check, concurrent pay vs cancel) | 2026-10-29 |
+| Admin UI with Origin check | CDP: login form + "Confirmar pago" click | Login OK; order → `paid`, audit `payment.confirmed` | 2026-10-29 |
+
 ## Manual Tests Pending
 - Play a gift to the end (dedication screen) on a real phone, both online and from an exported ZIP.
 - Exported ZIP served over http (`python -m http.server` / `npx serve`) and in Safari/Firefox: not verified.

@@ -101,3 +101,10 @@
 **Date:** 2026-10-29
 **Decision:** Pin `typescript@~6.0.3`. Removed `.npmrc` (`legacy-peer-deps`), no longer needed.
 **Reason:** typescript-eslint 8.x supports TypeScript <6.1 only, so `npm run lint` crashed with 7.0. Same language; code compiles unchanged. Revisit when typescript-eslint supports 7.x.
+
+## D019 — Phase 9 security policies
+**Date:** 2026-10-29
+- **Admin CSRF:** every non-GET admin request (including login) must carry `Origin` equal to the Worker's origin, in addition to `SameSite=Strict`. Rejected with 403.
+- **Buyer token lifecycle:** permanent private link, revoked manually by rotation from the admin (D015). No expiry in the MVP: buyers come back to share or download weeks later, and expiry would need a recovery flow (email) that is out of scope. Revisit if links leak in practice.
+- **Rate limiting trust:** limits key on `CF-Connecting-IP`, which Cloudflare sets at the edge. The Worker must only be exposed through Cloudflare (workers.dev or a Cloudflare-proxied domain), never behind another proxy.
+- **Public GETs** (order lookup, gift, manage) are not rate limited: identifiers are not enumerable (order 45 bits, slug ~68 bits, token ~182 bits) and each limit check costs a D1 write.

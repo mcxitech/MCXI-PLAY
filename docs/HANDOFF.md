@@ -1,33 +1,32 @@
 # MCXI Play — Handoff State
 
 ## Current Phase
-**Phase 9 — Seguridad y Calidad: ready for Codex audit.** Phases 7 and 8 complete.
+**Phase 9 — Seguridad y Calidad (COMPLETE, pending owner review).** Next: Phase 10 — Publicación en Cloudflare (needs owner approval and Cloudflare account access).
 
 ## Last Completed Task
-Pre-audit work by Claude Code: lint fixed (TS 6.0, D018), medium findings SEC-005/006/007 fixed, automated regression suite added (`tests/api.test.mjs`, 16/16 pass). Phase 7 purchase form verified in browser.
+Processed the Codex Phase 9 audit (`docs/SECURITY_REVIEW.md`): no critical/high findings. Fixed SEC-003 (Origin check on admin mutations), extended regression tests (18/18), documented policies for SEC-002/SEC-004 (D019), verified no secrets in Git history, final build.
 
 ## Important Changes
-- `worker/src/lib/repo.ts`: `transitionOrder` (conditional UPDATE), `activateOrder` (D1 batch transaction), `isRateLimited` (fixed window in D1), `createBuyer` (one buyer per order; `findOrCreateBuyer` removed). `updateOrderStatus`/`createGift` removed.
-- `worker/src/routes/admin.ts`: pay/activate/cancel return 409 if another request changed the order first; login rate limit 10/15 min per IP.
-- `worker/src/routes/public.ts`: order creation rate limit 10/hour per IP; one buyer per order.
-- `worker/src/lib/ulid.ts`: order number suffix 8 chars.
-- `worker/migrations/0002_rate_limits.sql`: new table `rate_limits`. **Must be applied** (local and, in Phase 10, remote).
-- `tests/api.test.mjs` + `npm run test:api`.
-- `AGENTS.md`: Phase 9 audit scope and local setup for Codex. `CLAUDE.md`: TS 6.0, test command.
-
-## For Codex (Phase 9 audit)
-Read `AGENTS.md` → "When Asked to Audit". Start from `docs/SECURITY_REVIEW.md`: SEC-001..007 have fix notes to verify; SEC-008 (ZIP export) is now implementable and pending review. Write findings to `docs/SECURITY_REVIEW.md`; do not change code.
+- `worker/src/routes/admin.ts`: non-GET admin requests require `Origin` == Worker origin (403 otherwise).
+- `tests/api.test.mjs`: sends `Origin`; new tests for CSRF and concurrent pay vs cancel.
+- `docs/SECURITY_REVIEW.md`: Codex report + "Respuesta de Claude Code" table. Previous audit is in Git history (`87c0e75`).
+- `docs/DECISIONS.md`: D019.
 
 ## Local Setup (not in Git)
 - `.dev.vars`: `ADMIN_PASSWORD_HASH=<sha256 hex>` and `SESSION_SECRET=<64 hex chars>`.
-- `npx wrangler d1 migrations apply mcxi-play-db --local`
+- `npx wrangler d1 migrations apply mcxi-play-db --local` (migrations 0001, 0002)
 - `npm run build` then `npx wrangler dev` → http://localhost:8787
 - Tests: `ADMIN_PASSWORD=<pw> npm run test:api`
 
-## Pending
-- `PAYMENT_INFO` (`src/lib/constants.ts`) has placeholder bank data; owner will decide (possibly a Mercado Pago payment link).
+## Pending (owner)
+- `PAYMENT_INFO` (`src/lib/constants.ts`) still has placeholder data.
 - Manual: play a gift to the dedication on a real phone (online and from ZIP); ZIP in Safari/Firefox and over http.
-- Public GET endpoints are not rate limited (by design, see SEC-006 note).
+
+## For Phase 10 (do not start without approval)
+- Create D1 database, put its `database_id` in `wrangler.toml`.
+- Secrets: `npx wrangler secret put ADMIN_PASSWORD_HASH`, `npx wrangler secret put SESSION_SECRET`.
+- Remote migrations: `npx wrangler d1 migrations apply mcxi-play-db --remote`.
+- Deploy only through Cloudflare (D019: rate limiting trusts `CF-Connecting-IP`).
 
 ## Next Task
-Codex audit for Phase 9. Then Claude fixes critical/high findings and runs the final build.
+Owner review of Phase 9. Then Phase 10, first task: "Configurar Wrangler".

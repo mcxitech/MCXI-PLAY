@@ -13,12 +13,13 @@ if (!PASSWORD) throw new Error('Set ADMIN_PASSWORD to the local admin password')
 // in production Cloudflare overwrites CF-Connecting-IP).
 const randomIp = () => `198.51.100.${Math.floor(Math.random() * 250) + 1}-${Date.now()}`
 
-async function call(path, { method = 'GET', body, cookie, ip = randomIp() } = {}) {
+async function call(path, { method = 'GET', body, cookie, ip = randomIp(), origin = new URL(BASE).origin } = {}) {
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
       'CF-Connecting-IP': ip,
+      ...(origin && method !== 'GET' ? { Origin: origin } : {}),
       ...(cookie ? { Cookie: cookie } : {}),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -104,6 +105,18 @@ test('every admin endpoint requires a session', async () => {
   }
 })
 
+test('admin mutations require same Origin (CSRF)', async () => {
+  const id = await orderId(await createOrder())
+  const evil = await call(`/api/admin/orders/${id}/pay`, { method: 'PATCH', body: {}, cookie: admin, origin: 'https://evil.example' })
+  assert.equal(evil.status, 403)
+  const missing = await call(`/api/admin/orders/${id}/pay`, { method: 'PATCH', body: {}, cookie: admin, origin: null })
+  assert.equal(missing.status, 403)
+  const loginEvil = await call('/api/admin/login', { method: 'POST', body: { password: PASSWORD }, origin: 'https://evil.example' })
+  assert.equal(loginEvil.status, 403)
+  const detail = await call(`/api/admin/orders/${id}`, { cookie: admin })
+  assert.equal(detail.data.status, 'pending', 'rejected request must not change state')
+})
+
 test('login is rate limited per IP (SEC-006)', async () => {
   const ip = randomIp()
   for (let i = 0; i < 10; i++) {
@@ -185,6 +198,20 @@ test('concurrent payment confirmations succeed once (SEC-005)', async () => {
     Array.from({ length: 5 }, () => call(`/api/admin/orders/${id}/pay`, { method: 'PATCH', body: {}, cookie: admin })),
   )
   assert.equal(results.filter((r) => r.status === 200).length, 1, results.map((r) => r.status).join(','))
+})
+
+test('concurrent pay and cancel leave one consistent state (SEC-005)', async () => {
+  const id = await orderId(await createOrder())
+  const [pay, cancel] = await Promise.all([
+    call(`/api/admin/orders/${id}/pay`, { method: 'PATCH', body: {}, cookie: admin }),
+    call(`/api/admin/orders/${id}/cancel`, { method: 'PATCH', cookie: admin }),
+  ])
+  const detail = await call(`/api/admin/orders/${id}`, { cookie: admin })
+  // Either order is fine; the final state must match the requests that succeeded
+  if (pay.status === 200 && cancel.status === 200) assert.equal(detail.data.status, 'cancelled') // pay then cancel (paid→cancelled is allowed)
+  else if (pay.status === 200) assert.equal(detail.data.status, 'paid')
+  else if (cancel.status === 200) assert.equal(detail.data.status, 'cancelled')
+  else assert.fail(`no request succeeded: ${pay.status}/${cancel.status}`)
 })
 
 test('activated orders cannot be cancelled; pending can (SEC-004)', async () => {

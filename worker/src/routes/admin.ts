@@ -19,6 +19,12 @@ export async function handleAdminRoutes(
     return jsonError('Admin no configurado', 503)
   }
 
+  // CSRF defense in depth (on top of SameSite=Strict): browsers always send Origin on
+  // POST/PATCH, so admin mutations must come from this same origin
+  if (method !== 'GET' && request.headers.get('Origin') !== url.origin) {
+    return jsonError('Origen no permitido', 403)
+  }
+
   // Login — no auth required
   if (method === 'POST' && pathname === '/api/admin/login') {
     // SEC-006: slow down password guessing (counts every attempt, per IP)
